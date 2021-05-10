@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <UserSecretsId>dotnet-RPINode-3E86ADDF-18FC-44DC-9151-D98B4C9E7F78</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+        <PackageReference Include="Unosquare.Raspberry.IO" Version="0.27.1" />
+        <PackageReference Include="Unosquare.RaspberryIO.Peripherals" Version="0.5.0" />
+    </ItemGroup>
+</Project>
