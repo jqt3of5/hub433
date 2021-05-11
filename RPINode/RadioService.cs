@@ -8,11 +8,11 @@ using Microsoft.Extensions.Logging;
 
 namespace RPINode
 {
-    public class Worker : BackgroundService
+    public class RadioService : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
+        private readonly ILogger<RadioService> _logger;
 
-        public Worker(ILogger<Worker> logger)
+        public RadioService(ILogger<RadioService> logger)
         {
             _logger = logger;
         }
