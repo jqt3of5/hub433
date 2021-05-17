@@ -28,7 +28,7 @@ namespace Hub433.Controllers
 
         [HttpGet]
         [HttpPost]
-        [Route("{nodeGuid}/bytes")]
+        [Route("transmit/{nodeGuid}")]
         public IActionResult SendBytes(string nodeGuid, [FromBody]string base64)
         {
             //TODO: Are we allowed to send these bytes to this device?
@@ -50,9 +50,8 @@ namespace Hub433.Controllers
         }
         
         [HttpGet]
-        [HttpPost]
-        [Route("{nodeGuid}/friendlyName")]
-        public IActionResult SetFriendlyName(string nodeGuid, [FromBody]string friendlyName)
+        [Route("{nodeGuid}")]
+        public IActionResult GetDevice(string nodeGuid)
         {
             //TODO: Are we allowed to update this device?
             if (!_repo.DoesNodeExist(nodeGuid))
@@ -60,26 +59,57 @@ namespace Hub433.Controllers
                 return StatusCode(404,$"Node with id {nodeGuid} did not exist");
             }
 
-            _repo.UpdateFriendlyName(nodeGuid, friendlyName);
+            var node = _repo.GetDevice(nodeGuid)!;
+            return Ok(node);
+        }
+        
+        [HttpPost]
+        [Route("{nodeGuid}/{propertyName}")]
+        public IActionResult SetPropertyValue(string nodeGuid, string propertyName, [FromBody]string propertyValue)
+        {
+            //TODO: Are we allowed to update this device?
+            if (!_repo.DoesNodeExist(nodeGuid))
+            {
+                return StatusCode(404,$"Node with id {nodeGuid} did not exist");
+            }
+
+            //Should set Property based on reflection
+            _repo.UpdateFriendlyName(nodeGuid, propertyValue);
             return Ok();
+        }
+        
+        [HttpGet]
+        [Route("{nodeGuid}/{propertyName}")]
+        public IActionResult GetPropertyValue(string nodeGuid, string propertyName)
+        {
+            //TODO: Are we allowed to update this device?
+            if (!_repo.DoesNodeExist(nodeGuid))
+            {
+                return StatusCode(404,$"Node with id {nodeGuid} did not exist");
+            }
+
+            //TODO: Should Get property based on reflection
+            var friendlyName = _repo.GetDevice(nodeGuid)!.FriendlyName;
+            return Ok(friendlyName);
         }
 
         //[HttpGet]
         //IActionResult GenerateClaimCode()
         //{
             //Called by the application
-           //Generate a random onetime use token for the authenticated user to claim a device 
+            //Generate a random onetime use token for the authenticated user to claim a device 
         //}
 
         [HttpPost]
-        [Route("{nodeGuid}/claim")]
-        IActionResult ClaimDevice(string nodeGuid)//, string claimCode)
+        [Route("claim/{nodeGuid}")]
+        IActionResult ClaimDevice(string nodeGuid)//, [FromBody] string claimCode)
         {
             //Called by the device
             //authenticate device (client Certificates maybe?)
            //Validate claim code exists
-           //Assign user to device
-           _repo.RegisterDevice(new DeviceMetadata(){Guid = nodeGuid, IsConnected = false});
+           //Assign user associated with claimcode to device
+           var user = "GeneralUser";
+           _repo.ClaimDevice(nodeGuid, user);
            return Ok();
         }
 

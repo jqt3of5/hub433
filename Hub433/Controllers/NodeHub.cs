@@ -18,6 +18,11 @@ namespace Hub433.Controllers
         {
             _repo.DeviceOnline(guid, Context.ConnectionId);
         }
+
+        public void DeviceOffline(string guid)
+        {
+            _repo.DeviceOffline(guid);
+        }
         
         //called when a 433Mhz receiver receives a newbyte string
         //public void PublishBytes(string bytes)

@@ -11,15 +11,16 @@ namespace Hub433.Busi
         void SendBytes(string base64Bytes);
     }
     
-    public record DeviceMetadata
+    public record DeviceMetadata(string Guid)
     {
+        //Probably better to store this as a separate table?
+        public string? Owner { get; set; }
         public string? FriendlyName { get; set; }
-        public string Guid { get; set; }
-        
         public bool IsConnected { get; set; }
         
         //public string OwnerId { get; set; }
         public string? NodeClientConnectionId { get; set; }
+        public DateTime? LastMessageRecieved { get; set; }
     }
     
     public class NodeRepo
@@ -53,14 +54,19 @@ namespace Hub433.Busi
             }
         }
 
-        public void DeviceOnline(string guid, string connectionId)
+        public void DeviceOnline(string nodeGuid, string connectionId)
         {
             lock (_lock)
             {
-                if (GetDevice(guid) is { } node)
+                if (GetDevice(nodeGuid) is { } node)
                 {
                     node.IsConnected = true;
                     node.NodeClientConnectionId = connectionId;
+                    node.LastMessageRecieved = DateTime.Now;
+                }
+                else
+                {
+                    _devices.Add(new DeviceMetadata(nodeGuid){IsConnected = true, NodeClientConnectionId = connectionId}); 
                 }
             }
         }
@@ -71,30 +77,23 @@ namespace Hub433.Busi
                 if (GetDevice(guid) is { } node)
                 {
                     node.IsConnected = false;
+                    node.LastMessageRecieved = DateTime.Now;
                 }
             }
         }
 
-        public void RegisterDevice(DeviceMetadata device)
+        public void ClaimDevice(string nodeGuid, string userId)
         {
             lock (_lock)
             {
-                UnregisterDevice(device.Guid);
-                _devices.Add(device); 
-            }
-        }
-        public void UnregisterDevice(DeviceMetadata device)
-        {
-            UnregisterDevice(device.Guid);
-        }
-        
-        public void UnregisterDevice(string guid)
-        {
-            lock (_lock)
-            {
-                if (_devices.FirstOrDefault(node => node.Guid == guid) is { } node)
+                if (GetDevice(nodeGuid) is { } node)
                 {
-                    UnregisterDevice(node);
+                    _devices.Remove(node);
+                    _devices.Add(node with {Owner = userId});
+                }
+                else
+                {
+                    _devices.Add(new DeviceMetadata(nodeGuid){IsConnected = false, Owner = userId}); 
                 }
             }
         }
