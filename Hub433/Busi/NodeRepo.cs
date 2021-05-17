@@ -6,11 +6,6 @@ using System.Xml;
 
 namespace Hub433.Busi
 {
-    public interface INodeClient
-    {
-        void SendBytes(string base64Bytes);
-    }
-    
     public record DeviceMetadata(string Guid)
     {
         //Probably better to store this as a separate table?

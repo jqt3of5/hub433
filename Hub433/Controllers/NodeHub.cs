@@ -2,6 +2,7 @@
 using System.Net;
 using Hub433.Busi;
 using Microsoft.AspNetCore.SignalR;
+using Node.Abstractions;
 
 namespace Hub433.Controllers
 {
