@@ -1,16 +1,18 @@
-﻿using Unosquare.RaspberryIO.Abstractions;
+﻿using Unosquare.PiGpio.ManagedModel;
+using Unosquare.PiGpio.NativeEnums;
+using Unosquare.RaspberryIO.Abstractions;
 
 namespace RPINode
 {
     public class Receiver433
     {
-        private readonly BcmPin _pin;
+        private readonly GpioPin _pin;
 
-        public Receiver433(BcmPin pin)
+        public Receiver433(GpioPin pin)
         {
             _pin = pin;
+            _pin.Direction = PinDirection.Input;
         }
-        
         
     }
 }

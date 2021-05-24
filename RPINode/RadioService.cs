@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Node.Abstractions;
+using Unosquare.RaspberryIO.Abstractions;
 
 namespace RPINode
 {
@@ -16,11 +17,14 @@ namespace RPINode
         private readonly ILogger<RadioService> _logger;
 
         private HubConnection SignalRConnection { get; }
-        public RadioService(ILogger<RadioService> logger)
+        private Transmitter433 _transmitter433;
+        public RadioService(ILogger<RadioService> logger, IGpioController controller)
         {
             _logger = logger;
+            _transmitter433 = new Transmitter433(controller[BcmPin.Gpio17]);
+            
             SignalRConnection = new HubConnectionBuilder()
-                .WithUrl("http://localhost:53353/nodeHub")
+                .WithUrl("http://localhost:8080/nodeHub")
                 .Build();
             SignalRConnection.Closed += async exception =>
             {
@@ -32,11 +36,11 @@ namespace RPINode
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            SignalRConnection.On(nameof(INodeClient.SendBytes), (string base64Bytes) =>
+            SignalRConnection.On(nameof(INodeClient.SendBytes), async (string bitstring) =>
             {
-                var bytes = Convert.FromBase64String(base64Bytes);
-                
-                //TODO: Write bytes
+               await _transmitter433.Transmit(bitstring.Select(bit => 
+                    new RadioSymbol(bit == '1' ? TimeSpan.FromMilliseconds(10) : TimeSpan.Zero, bit =='0' ? TimeSpan.FromMilliseconds(10) : TimeSpan.Zero)
+                ).ToArray());
             });
             SignalRConnection.On(nameof(INodeClient.StartListening), (int timeoutSeconds) =>
             {
@@ -54,6 +58,8 @@ namespace RPINode
                 Console.WriteLine(e);
                 return;
             }
+            
+            await SignalRConnection.InvokeAsync("DeviceOnline", "12345", CancellationToken.None);
             
             while (!stoppingToken.IsCancellationRequested)
             {

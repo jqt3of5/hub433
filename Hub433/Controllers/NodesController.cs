@@ -21,6 +21,7 @@ namespace Hub433.Controllers
         }
 
         [HttpGet]
+        [Route("all")]
         public IActionResult GetNodes()
         {
             //TODO: Get only nodes belonging to the current user
@@ -30,7 +31,7 @@ namespace Hub433.Controllers
         [HttpGet]
         [HttpPost]
         [Route("transmit/{nodeGuid}")]
-        public IActionResult SendBytes(string nodeGuid, [FromBody]string base64)
+        public IActionResult SendBytes(string nodeGuid, [FromBody]string bits)
         {
             //TODO: Are we allowed to send these bytes to this device?
             if (!_repo.DoesNodeExist(nodeGuid))
@@ -41,7 +42,7 @@ namespace Hub433.Controllers
             try
             {
                 var node = _repo.GetDevice(nodeGuid);
-                _hubContext.Clients.Client(node.NodeClientConnectionId).SendBytes(base64);
+                _hubContext.Clients.Client(node.NodeClientConnectionId).SendBytes(bits);
             }
             catch (Exception e)
             {
@@ -51,7 +52,7 @@ namespace Hub433.Controllers
         }
         
         [HttpGet]
-        [Route("{nodeGuid}")]
+        [Route("/node/{nodeGuid}")]
         public IActionResult GetDevice(string nodeGuid)
         {
             //TODO: Are we allowed to update this device?
@@ -65,7 +66,7 @@ namespace Hub433.Controllers
         }
         
         [HttpPost]
-        [Route("{nodeGuid}/{propertyName}")]
+        [Route("/node/{nodeGuid}/{propertyName}")]
         public IActionResult SetPropertyValue(string nodeGuid, string propertyName, [FromBody]string propertyValue)
         {
             //TODO: Are we allowed to update this device?
@@ -80,7 +81,7 @@ namespace Hub433.Controllers
         }
         
         [HttpGet]
-        [Route("{nodeGuid}/{propertyName}")]
+        [Route("/node/{nodeGuid}/{propertyName}")]
         public IActionResult GetPropertyValue(string nodeGuid, string propertyName)
         {
             //TODO: Are we allowed to update this device?

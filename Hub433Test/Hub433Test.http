@@ -1,0 +1,6 @@
+﻿GET http://localhost:8080/nodes/all
+###
+POST http://localhost:8080/nodes/transmit/12345
+Content-Type: application/json
+
+"1110010101"

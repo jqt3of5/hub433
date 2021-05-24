@@ -10,22 +10,29 @@ namespace RPINode
     
     public class Transmitter433
     {
-        private readonly GpioPin _pin;
+        private readonly IGpioPin _pin;
 
-        public Transmitter433(GpioPin pin)
+        public Transmitter433(IGpioPin pin)
         {
             _pin = pin;
-            pin.Direction = PinDirection.Output;
+            pin.PinMode = GpioPinDriveMode.Output;
         }
 
         public async Task Transmit(RadioSymbol[] symbols)
         {
             foreach (var symbol in symbols)
             {
-                _pin.Value = true;
-                await Task.Delay(symbol.High);
-                _pin.Value = false;
-                await Task.Delay(symbol.Low);
+                if (symbol.High != TimeSpan.Zero)
+                {
+                    _pin.Value = true;
+                    await Task.Delay(symbol.High);
+                }
+                
+                if (symbol.Low != TimeSpan.Zero)
+                {
+                    _pin.Value = false;
+                    await Task.Delay(symbol.Low);
+                }
             }  
         }
     }
