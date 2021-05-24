@@ -26,6 +26,7 @@ namespace RPINode
             SignalRConnection = new HubConnectionBuilder()
                 .WithUrl("http://localhost:8080/nodeHub")
                 .Build();
+            
             SignalRConnection.Closed += async exception =>
             {
                 Console.WriteLine(exception);
@@ -39,12 +40,17 @@ namespace RPINode
             SignalRConnection.On(nameof(INodeClient.SendBytes), async (string bitstring) =>
             {
                await _transmitter433.Transmit(bitstring.Select(bit => 
-                    new RadioSymbol(bit == '1' ? TimeSpan.FromMilliseconds(10) : TimeSpan.Zero, bit =='0' ? TimeSpan.FromMilliseconds(10) : TimeSpan.Zero)
+                    new RadioSymbol(
+                        bit == '1' ? TimeSpan.FromMilliseconds(10) : TimeSpan.Zero, 
+                        bit =='0' ? TimeSpan.FromMilliseconds(10) : TimeSpan.Zero
+                        )
                 ).ToArray());
             });
+            
             SignalRConnection.On(nameof(INodeClient.StartListening), (int timeoutSeconds) =>
             {
             });
+            
             SignalRConnection.On(nameof(INodeClient.StopListening), () =>
             {
             });
@@ -59,13 +65,13 @@ namespace RPINode
                 return;
             }
             
-            await SignalRConnection.InvokeAsync("DeviceOnline", "12345", CancellationToken.None);
-            
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(1000, stoppingToken);
+                await SignalRConnection.InvokeAsync("DeviceOnline", "12345", stoppingToken);
+                await Task.Delay(10000, stoppingToken);
             }
+
+            await SignalRConnection.InvokeAsync("DeviceOffline", "12345", stoppingToken);
         }
     }
 }

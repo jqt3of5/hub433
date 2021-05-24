@@ -42,10 +42,12 @@ namespace HardwareAbstractionServiceRPI.Peripherals
 
             public void Write(bool value)
             {
+                Console.Write(value ? "1": "0");
             }
 
             public void Write(GpioPinValue value)
             {
+                Console.Write(value == GpioPinValue.High ? "1": "0");
             }
 
             public bool WaitForValue(GpioPinValue status, int timeOutMillisecond)

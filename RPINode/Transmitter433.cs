@@ -24,13 +24,13 @@ namespace RPINode
             {
                 if (symbol.High != TimeSpan.Zero)
                 {
-                    _pin.Value = true;
+                    _pin.Write(true);
                     await Task.Delay(symbol.High);
                 }
                 
                 if (symbol.Low != TimeSpan.Zero)
                 {
-                    _pin.Value = false;
+                    _pin.Write(false);
                     await Task.Delay(symbol.Low);
                 }
             }  
