@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using Hub433.Busi;
 using Microsoft.AspNetCore.Mvc;
@@ -8,51 +9,27 @@ using Node.Abstractions;
 namespace Hub433.Controllers
 {
     [ApiController]
-    [Route("nodes")]
     public class NodesController : Controller
     {
         private readonly NodeRepo _repo;
-        private readonly IHubContext<NodeHub, INodeClient> _hubContext;
+        private readonly IHubContext<NodeHub> _hubContext;
 
-        public NodesController(NodeRepo repo, IHubContext<NodeHub, INodeClient> hubContext)
+        public NodesController(NodeRepo repo, IHubContext<NodeHub> hubContext)
         {
             _repo = repo;
             _hubContext = hubContext;
         }
 
         [HttpGet]
-        [Route("all")]
+        [Route("nodes/all")]
         public IActionResult GetNodes()
         {
             //TODO: Get only nodes belonging to the current user
             return Ok(_repo.Devices);
         }
-
-        [HttpGet]
-        [HttpPost]
-        [Route("transmit/{nodeGuid}")]
-        public IActionResult SendBytes(string nodeGuid, [FromBody]string bits)
-        {
-            //TODO: Are we allowed to send these bytes to this device?
-            if (!_repo.DoesNodeExist(nodeGuid))
-            {
-                return StatusCode(404,$"Node with id {nodeGuid} did not exist");
-            }
-
-            try
-            {
-                var node = _repo.GetDevice(nodeGuid);
-                _hubContext.Clients.Client(node.NodeClientConnectionId).SendBytes(bits);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, $"Could not send bytes to node. Error: {e}");
-            }
-            return Ok();
-        }
         
         [HttpGet]
-        [Route("/node/{nodeGuid}")]
+        [Route("node/{nodeGuid}")]
         public IActionResult GetDevice(string nodeGuid)
         {
             //TODO: Are we allowed to update this device?
@@ -66,8 +43,8 @@ namespace Hub433.Controllers
         }
         
         [HttpPost]
-        [Route("/node/{nodeGuid}/{propertyName}")]
-        public IActionResult SetPropertyValue(string nodeGuid, string propertyName, [FromBody]string propertyValue)
+        [Route("node/{nodeGuid}/metadata/{propertyName}")]
+        public IActionResult SetMetadataValue(string nodeGuid, string propertyName, [FromBody]string propertyValue)
         {
             //TODO: Are we allowed to update this device?
             if (!_repo.DoesNodeExist(nodeGuid))
@@ -81,8 +58,8 @@ namespace Hub433.Controllers
         }
         
         [HttpGet]
-        [Route("/node/{nodeGuid}/{propertyName}")]
-        public IActionResult GetPropertyValue(string nodeGuid, string propertyName)
+        [Route("node/{nodeGuid}/metadata/{propertyName}")]
+        public IActionResult GetMetadataValue(string nodeGuid, string propertyName)
         {
             //TODO: Are we allowed to update this device?
             if (!_repo.DoesNodeExist(nodeGuid))
@@ -94,7 +71,29 @@ namespace Hub433.Controllers
             var friendlyName = _repo.GetDevice(nodeGuid)!.FriendlyName;
             return Ok(friendlyName);
         }
+        [HttpGet]
+        [HttpPost]
+        [Route("node/{nodeGuid}/action/{actionName}")]
+        public IActionResult InvokeAction(string nodeGuid, string actionName, [FromBody]string[] parameters)
+        {
+            //TODO: Are we allowed to send these bytes to this device?
+            if (!_repo.DoesNodeExist(nodeGuid))
+            {
+                return StatusCode(404,$"Node with id {nodeGuid} did not exist");
+            }
 
+            try
+            {
+                var node = _repo.GetDevice(nodeGuid);
+                
+                _hubContext.Clients.Client(node.NodeClientConnectionId).SendAsync(actionName, parameters.First());
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, $"Could not send bytes to node. Error: {e}");
+            }
+            return Ok();
+        }
         //[HttpGet]
         //IActionResult GenerateClaimCode()
         //{
@@ -103,7 +102,7 @@ namespace Hub433.Controllers
         //}
 
         [HttpPost]
-        [Route("claim/{nodeGuid}")]
+        [Route("node/{nodeGuid}/claim")]
         IActionResult ClaimDevice(string nodeGuid)//, [FromBody] string claimCode)
         {
             //Called by the device

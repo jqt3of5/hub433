@@ -6,7 +6,7 @@ using Node.Abstractions;
 
 namespace Hub433.Controllers
 {
-    public class NodeHub : Hub<INodeClient>
+    public class NodeHub : Hub
     {
         private readonly NodeRepo _repo;
 
