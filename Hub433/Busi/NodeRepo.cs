@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Xml;
+using Node.Abstractions;
 
 namespace Hub433.Busi
 {
@@ -16,8 +17,10 @@ namespace Hub433.Busi
         //public string OwnerId { get; set; }
         public string? NodeClientConnectionId { get; set; }
         public DateTime? LastMessageRecieved { get; set; }
+        
+        public DeviceCapabilities? Capabilities { get; set; }
     }
-    
+
     public class NodeRepo
     {
         private object _lock = new object();
@@ -49,7 +52,7 @@ namespace Hub433.Busi
             }
         }
 
-        public void DeviceOnline(string nodeGuid, string connectionId)
+        public void DeviceOnline(string nodeGuid, DeviceCapabilities capabilities, string connectionId)
         {
             lock (_lock)
             {
@@ -57,11 +60,12 @@ namespace Hub433.Busi
                 {
                     node.IsConnected = true;
                     node.NodeClientConnectionId = connectionId;
+                    node.Capabilities = capabilities;
                     node.LastMessageRecieved = DateTime.Now;
                 }
                 else
                 {
-                    _devices.Add(new DeviceMetadata(nodeGuid){IsConnected = true, NodeClientConnectionId = connectionId}); 
+                    _devices.Add(new DeviceMetadata(nodeGuid){IsConnected = true, Capabilities = capabilities, NodeClientConnectionId = connectionId}); 
                 }
             }
         }

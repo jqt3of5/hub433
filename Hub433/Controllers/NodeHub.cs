@@ -2,7 +2,10 @@
 using System.Net;
 using Hub433.Busi;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
 using Node.Abstractions;
+using Swan.Formatters;
+using DeviceCapabilities = Node.Abstractions.DeviceCapabilities;
 
 namespace Hub433.Controllers
 {
@@ -15,9 +18,10 @@ namespace Hub433.Controllers
             _repo = repo;
         }
         
-        public void DeviceOnline(string guid)
+        public void DeviceOnline(string guid, string deviceCapabilities)
         {
-            _repo.DeviceOnline(guid, Context.ConnectionId);
+            var capabilities = Json.Deserialize<DeviceCapabilities>(deviceCapabilities);
+            _repo.DeviceOnline(guid, capabilities,  Context.ConnectionId);
         }
 
         public void DeviceOffline(string guid)

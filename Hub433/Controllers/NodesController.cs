@@ -82,14 +82,16 @@ namespace Hub433.Controllers
                 return StatusCode(404,$"Node with id {nodeGuid} did not exist");
             }
 
+            
+            
             try
             {
                 var node = _repo.GetDevice(nodeGuid);
-                
                 _hubContext.Clients.Client(node.NodeClientConnectionId).SendAsync(actionName, parameters.First());
             }
             catch (Exception e)
             {
+                //TODO: Is the exception caused by a disconnected client?
                 return StatusCode(500, $"Could not send bytes to node. Error: {e}");
             }
             return Ok();
