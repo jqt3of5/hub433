@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Node.Abstractions;
 using Unosquare.PiGpio.ManagedModel;
 using Unosquare.PiGpio.NativeEnums;
 using Unosquare.RaspberryIO.Abstractions;
 
 namespace RPINode
 {
-    public record RadioSymbol(TimeSpan High, TimeSpan Low);
+    public record RadioSymbol(TimeSpan Duration, bool Value, int? Samples = null);
     
     public class Transmitter433
     {
@@ -22,17 +23,8 @@ namespace RPINode
         {
             foreach (var symbol in symbols)
             {
-                if (symbol.High != TimeSpan.Zero)
-                {
-                    _pin.Write(true);
-                    await Task.Delay(symbol.High);
-                }
-                
-                if (symbol.Low != TimeSpan.Zero)
-                {
-                    _pin.Write(false);
-                    await Task.Delay(symbol.Low);
-                }
+                _pin.Write(symbol.Value);
+                await Task.Delay(symbol.Duration);
             }  
         }
     }

@@ -9,69 +9,68 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Node.Abstractions;
 using Unosquare.RaspberryIO.Abstractions;
+using static Node.Abstractions.DeviceCapability;
 
 namespace RPINode
 {
     public class RadioService : BackgroundService
     {
         private readonly ILogger<RadioService> _logger;
-
-        private HubConnection SignalRConnection { get; }
+        private readonly InternalNodeHubApi _hubApi;
         private Transmitter433 _transmitter433;
-        public RadioService(ILogger<RadioService> logger, IGpioController controller)
+        private Receiver433 _receiver433;
+
+        private readonly DeviceCapability[] Capabilities;
+        public RadioService(ILogger<RadioService> logger, IGpioController controller, InternalNodeHubApi hubApi)
         {
             _logger = logger;
+            _hubApi = hubApi;
             _transmitter433 = new Transmitter433(controller[BcmPin.Gpio17]);
+            _receiver433 = new Receiver433(controller[BcmPin.Gpio23]);
             
-            SignalRConnection = new HubConnectionBuilder()
-                .WithUrl("http://localhost:8080/nodeHub")
-                .Build();
+            var transmitterCapability = new DeviceCapability(
+                "Transmitter17",
+                nameof(Transmitter433),
+                new ValueDescriptor[] { },
+                new[]
+                {
+                    new ActionDescriptor(
+                        "Transmit",
+                        new[] {new ValueDescriptor("bitString", ValueDescriptor.TypeEnum.String) }, 
+                        ValueDescriptor.TypeEnum.Void),
+                });
             
-            SignalRConnection.Closed += async exception =>
-            {
-                Console.WriteLine(exception);
-                await Task.Delay(new Random().Next(0, 5) * 1000);
-                await SignalRConnection.StartAsync();
-            };
+            var blindsCapability = new DeviceCapability(
+                "Blinds17",
+                nameof(Blinds),
+                new ValueDescriptor[] { },
+                new[]
+                {
+                    new ActionDescriptor(
+                        "Open",
+                        new ValueDescriptor[] { }, 
+                        ValueDescriptor.TypeEnum.Void),
+                    new ActionDescriptor(
+                        "Close",
+                        new ValueDescriptor[] { }, 
+                        ValueDescriptor.TypeEnum.Void),
+                    new ActionDescriptor(
+                        "Stop",
+                        new ValueDescriptor[] { }, 
+                        ValueDescriptor.TypeEnum.Void)
+                });
+            Capabilities = new[] {transmitterCapability, blindsCapability};
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            SignalRConnection.On(nameof(INodeClient.SendBytes), async (string bitstring) =>
-            {
-               await _transmitter433.Transmit(bitstring.Select(bit => 
-                    new RadioSymbol(
-                        bit == '1' ? TimeSpan.FromMilliseconds(10) : TimeSpan.Zero, 
-                        bit =='0' ? TimeSpan.FromMilliseconds(10) : TimeSpan.Zero
-                        )
-                ).ToArray());
-            });
-            
-            SignalRConnection.On(nameof(INodeClient.StartListening), (int timeoutSeconds) =>
-            {
-            });
-            
-            SignalRConnection.On(nameof(INodeClient.StopListening), () =>
-            {
-            });
-            
-            try
-            {
-                await SignalRConnection.StartAsync(stoppingToken);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return;
-            }
-            
             while (!stoppingToken.IsCancellationRequested)
             {
-                await SignalRConnection.InvokeAsync("DeviceOnline", "12345", stoppingToken);
+                await _hubApi.DeviceOnline("MyOnlyDevice", Capabilities);
                 await Task.Delay(10000, stoppingToken);
             }
 
-            await SignalRConnection.InvokeAsync("DeviceOffline", "12345", stoppingToken);
+            await _hubApi.DeviceOffline("MyOnlyDevice");
         }
     }
 }

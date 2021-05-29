@@ -8,6 +8,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.0-preview.3.21201.13" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+        <PackageReference Include="MQTTnet" Version="3.0.15" />
         <PackageReference Include="Unosquare.PiGpio" Version="0.3.1" />
         <PackageReference Include="Unosquare.Raspberry.IO" Version="0.27.1" />
         <PackageReference Include="Unosquare.RaspberryIO.Peripherals" Version="0.5.0" />

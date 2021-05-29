@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MQTTnet;
+using MQTTnet.Server;
 
 namespace Hub433
 {
@@ -21,6 +23,7 @@ namespace Hub433
             services.AddSingleton<NodeRepo>();
             services.AddControllers();
             services.AddSignalR();
+            services.AddHostedService<MqttHostedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -37,7 +40,6 @@ namespace Hub433
             {
                 endpoints.MapControllers();
                 endpoints.MapGet("/", async context => { await context.Response.WriteAsync("Hello World!"); });
-                endpoints.MapHub<NodeHub>("/nodeHub");
             });
         }
     }

@@ -18,7 +18,7 @@ namespace Hub433.Busi
         public string? NodeClientConnectionId { get; set; }
         public DateTime? LastMessageRecieved { get; set; }
         
-        public DeviceCapabilities? Capabilities { get; set; }
+        public DeviceCapability []? DeviceCapabilities { get; set; }
     }
 
     public class NodeRepo
@@ -52,20 +52,22 @@ namespace Hub433.Busi
             }
         }
 
-        public void DeviceOnline(string nodeGuid, DeviceCapabilities capabilities, string connectionId)
+        public void DeviceOnline(string nodeGuid, DeviceCapability []?  capabilities)
         {
             lock (_lock)
             {
                 if (GetDevice(nodeGuid) is { } node)
                 {
                     node.IsConnected = true;
-                    node.NodeClientConnectionId = connectionId;
-                    node.Capabilities = capabilities;
+                    if (capabilities != null)
+                    {
+                        node.DeviceCapabilities = capabilities;
+                    }
                     node.LastMessageRecieved = DateTime.Now;
                 }
                 else
                 {
-                    _devices.Add(new DeviceMetadata(nodeGuid){IsConnected = true, Capabilities = capabilities, NodeClientConnectionId = connectionId}); 
+                    _devices.Add(new DeviceMetadata(nodeGuid){IsConnected = true, DeviceCapabilities = capabilities}); 
                 }
             }
         }
@@ -96,5 +98,18 @@ namespace Hub433.Busi
                 }
             }
         }
+
+        public void UnclaimDevice(string nodeGuid)
+        {
+            lock (_lock)
+            {
+                if (GetDevice(nodeGuid) is { } node)
+                {
+                    _devices.Remove(node);
+                    _devices.Add(node with {Owner = null});
+                }
+            }
+        }
+        
     }
 }

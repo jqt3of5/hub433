@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using Hub433.Busi;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
 using Node.Abstractions;
 
@@ -12,12 +13,9 @@ namespace Hub433.Controllers
     public class NodesController : Controller
     {
         private readonly NodeRepo _repo;
-        private readonly IHubContext<NodeHub> _hubContext;
-
-        public NodesController(NodeRepo repo, IHubContext<NodeHub> hubContext)
+        public NodesController(NodeRepo repo)
         {
             _repo = repo;
-            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -71,6 +69,7 @@ namespace Hub433.Controllers
             var friendlyName = _repo.GetDevice(nodeGuid)!.FriendlyName;
             return Ok(friendlyName);
         }
+        
         [HttpGet]
         [HttpPost]
         [Route("node/{nodeGuid}/action/{actionName}")]
@@ -81,13 +80,11 @@ namespace Hub433.Controllers
             {
                 return StatusCode(404,$"Node with id {nodeGuid} did not exist");
             }
-
-            
             
             try
             {
                 var node = _repo.GetDevice(nodeGuid);
-                _hubContext.Clients.Client(node.NodeClientConnectionId).SendAsync(actionName, parameters.First());
+                // _hubContext.Clients.Client(node.NodeClientConnectionId).SendAsync(actionName, parameters.First());
             }
             catch (Exception e)
             {
@@ -96,29 +93,27 @@ namespace Hub433.Controllers
             }
             return Ok();
         }
-        //[HttpGet]
-        //IActionResult GenerateClaimCode()
-        //{
-            //Called by the application
-            //Generate a random onetime use token for the authenticated user to claim a device 
-        //}
-
-        [HttpPost]
-        [Route("node/{nodeGuid}/claim")]
-        IActionResult ClaimDevice(string nodeGuid)//, [FromBody] string claimCode)
+        
+        [HttpGet]
+        [Route("node/claimCode")]
+        IActionResult GenerateClaimCode()
         {
-            //Called by the device
-            //authenticate device (client Certificates maybe?)
-           //Validate claim code exists
-           //Assign user associated with claimcode to device
-           var user = "GeneralUser";
-           _repo.ClaimDevice(nodeGuid, user);
-           return Ok();
+            //TODO: Store claim code, and associated user in DB
+            return Ok(new Guid());
         }
-
-        //[HttpPost]
-        //IActionResult UnclaimDevice(string nodeid)
-        //{
-        //}
+       
+        [HttpPost]
+        [Route("node/{nodeGuid}/unclaim")]
+        IActionResult UnclaimDevice(string nodeGuid)
+        {
+            //TODO: Are we allowed to send these bytes to this device?
+            if (!_repo.DoesNodeExist(nodeGuid))
+            {
+                return StatusCode(404,$"Node with id {nodeGuid} did not exist");
+            }
+            
+            _repo.UnclaimDevice(nodeGuid);
+            return Ok();
+        }
     }
 }
