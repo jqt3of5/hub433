@@ -8,8 +8,10 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Node.Abstractions;
+using RPINode.Capabilities;
+using RPINode.Peripherals;
 using Unosquare.RaspberryIO.Abstractions;
-using static Node.Abstractions.DeviceCapability;
+using static Node.Abstractions.DeviceCapabilityDescriptor;
 
 namespace RPINode
 {
@@ -17,59 +19,32 @@ namespace RPINode
     {
         private readonly ILogger<RadioService> _logger;
         private readonly InternalNodeHubApi _hubApi;
+        private readonly CapabilityService _capabilityService;
         private Transmitter433 _transmitter433;
         private Receiver433 _receiver433;
-
-        private readonly DeviceCapability[] Capabilities;
-        public RadioService(ILogger<RadioService> logger, IGpioController controller, InternalNodeHubApi hubApi)
+        private BlindsCapability _blinds; 
+        public RadioService(ILogger<RadioService> logger, IGpioController controller, InternalNodeHubApi hubApi, CapabilityService capabilityService)
         {
             _logger = logger;
             _hubApi = hubApi;
+            _capabilityService = capabilityService;
+            
             _transmitter433 = new Transmitter433(controller[BcmPin.Gpio17]);
             _receiver433 = new Receiver433(controller[BcmPin.Gpio23]);
-            
-            var transmitterCapability = new DeviceCapability(
-                "Transmitter17",
-                nameof(Transmitter433),
-                new ValueDescriptor[] { },
-                new[]
-                {
-                    new ActionDescriptor(
-                        "Transmit",
-                        new[] {new ValueDescriptor("bitString", ValueDescriptor.TypeEnum.String) }, 
-                        ValueDescriptor.TypeEnum.Void),
-                });
-            
-            var blindsCapability = new DeviceCapability(
-                "Blinds17",
-                nameof(Blinds),
-                new ValueDescriptor[] { },
-                new[]
-                {
-                    new ActionDescriptor(
-                        "Open",
-                        new ValueDescriptor[] { }, 
-                        ValueDescriptor.TypeEnum.Void),
-                    new ActionDescriptor(
-                        "Close",
-                        new ValueDescriptor[] { }, 
-                        ValueDescriptor.TypeEnum.Void),
-                    new ActionDescriptor(
-                        "Stop",
-                        new ValueDescriptor[] { }, 
-                        ValueDescriptor.TypeEnum.Void)
-                });
-            Capabilities = new[] {transmitterCapability, blindsCapability};
+            _blinds = new BlindsCapability(new BlindsDevice(_transmitter433));
         }
-
+        
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            var descriptor = _capabilityService.RegisterCapability(_blinds);
+            
             while (!stoppingToken.IsCancellationRequested)
             {
-                await _hubApi.DeviceOnline("MyOnlyDevice", Capabilities);
+                await _hubApi.DeviceOnline("MyOnlyDevice", new[] {descriptor});
                 await Task.Delay(10000, stoppingToken);
             }
 
+            //TODO: Unregister device
             await _hubApi.DeviceOffline("MyOnlyDevice");
         }
     }

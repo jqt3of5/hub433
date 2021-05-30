@@ -1,6 +1,8 @@
-﻿namespace Node.Abstractions
+﻿using System;
+
+namespace Node.Abstractions
 {
-    public record DeviceCapability (string CapabilityId, string CapabilityTypeId, DeviceCapability.ValueDescriptor [] Values, DeviceCapability.ActionDescriptor [] Actions)
+    public record DeviceCapabilityDescriptor (string CapabilityId, string CapabilityTypeId, DeviceCapabilityDescriptor.ValueDescriptor [] Values, DeviceCapabilityDescriptor.ActionDescriptor [] Actions)
     {
         public record ActionDescriptor(string Name, ValueDescriptor[] Parameters, ValueDescriptor.TypeEnum ReturnType);
 
@@ -14,5 +16,31 @@
                 Void
             }
         }
+    }
+
+    [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+    public sealed class ActionAttribute : Attribute
+    {
+        // See the attribute guidelines at 
+        //  http://go.microsoft.com/fwlink/?LinkId=85236
+        public ActionAttribute()
+        {
+        }
+    }
+    [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+    public sealed class ValueAttribute : Attribute
+    {
+        // See the attribute guidelines at 
+        //  http://go.microsoft.com/fwlink/?LinkId=85236
+        public ValueAttribute()
+        {
+        }
+    } 
+    
+    
+    public interface ICapability
+    {
+        string CapabilityId { get; }
+        string CapabilityTypeId { get; } 
     }
 }

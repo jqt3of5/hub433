@@ -12,6 +12,7 @@ namespace RPINode
     public class Transmitter433
     {
         private readonly IGpioPin _pin;
+        public BcmPin BcmPin => _pin.BcmPin;
 
         public Transmitter433(IGpioPin pin)
         {

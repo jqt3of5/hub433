@@ -18,7 +18,7 @@ namespace Hub433.Busi
         public string? NodeClientConnectionId { get; set; }
         public DateTime? LastMessageRecieved { get; set; }
         
-        public DeviceCapability []? DeviceCapabilities { get; set; }
+        public DeviceCapabilityDescriptor []? DeviceCapabilities { get; set; }
     }
 
     public class NodeRepo
@@ -52,7 +52,7 @@ namespace Hub433.Busi
             }
         }
 
-        public void DeviceOnline(string nodeGuid, DeviceCapability []?  capabilities)
+        public void DeviceOnline(string nodeGuid, DeviceCapabilityDescriptor []?  capabilities)
         {
             lock (_lock)
             {

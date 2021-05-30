@@ -7,7 +7,7 @@ namespace Node.Abstractions
     {
         private RestClient _httpClient = new RestClient("http://localhost");
 
-        public async Task DeviceOnline(string deviceGuid, DeviceCapability[] capabilities)
+        public async Task DeviceOnline(string deviceGuid, DeviceCapabilityDescriptor[] capabilities)
         {
             var request = new RestRequest($"/node/{deviceGuid}/online", Method.POST, DataFormat.Json);
             request.AddJsonBody(capabilities);
