@@ -9,12 +9,12 @@ namespace RPINode
 {
     public class Receiver433
     {
-        private readonly IGpioPin _pin;
+        private readonly GpioPin _pin;
 
-        public Receiver433(IGpioPin pin)
+        public Receiver433(GpioPin pin)
         {
             _pin = pin;
-            _pin.PinMode = GpioPinDriveMode.Input;
+            _pin.Direction = PinDirection.Input;
         }
 
         public RadioSymbol[] Receive(TimeSpan timeout)
@@ -26,7 +26,7 @@ namespace RPINode
             {
                 for (int i = 0; i < 100; ++i)
                 {
-                    samples.Add(_pin.Read()); 
+                    samples.Add(_pin.Value); 
                 }
                 //Is this accurate enough to measure these reads? Difficult to say.  
                 sampleIntervals.Add(DateTime.Now - startTime);

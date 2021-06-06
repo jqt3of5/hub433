@@ -3,6 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <UserSecretsId>dotnet-RPINode-3E86ADDF-18FC-44DC-9151-D98B4C9E7F78</UserSecretsId>
+        <RootNamespace>RPINode</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,5 +17,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Node.Abstractions\Node.Abstractions.csproj" />
+      <ProjectReference Include="..\Node.Hardware\Node.Hardware.csproj" />
     </ItemGroup>
 </Project>
