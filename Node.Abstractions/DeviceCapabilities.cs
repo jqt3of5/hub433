@@ -4,10 +4,15 @@ namespace Node.Abstractions
 {
     public record DeviceCapabilityDescriptor (string CapabilityId, string CapabilityTypeId, DeviceCapabilityDescriptor.ValueDescriptor [] Values, DeviceCapabilityDescriptor.ActionDescriptor [] Actions)
     {
-        public record ActionDescriptor(string Name, ValueDescriptor[] Parameters, ValueDescriptor.TypeEnum ReturnType);
+        public record ActionDescriptor(string Name, ValueDescriptor[] Parameters, ValueDescriptor.TypeEnum ReturnType)
+        {
+            public string MqttTopic { get; set; }
+        }
 
         public record ValueDescriptor(string Name, ValueDescriptor.TypeEnum Type)
         {
+            public string MqttTopic { get; set; }
+            
             public enum TypeEnum
             {
                 Int, 
@@ -36,7 +41,15 @@ namespace Node.Abstractions
         {
         }
     } 
-    
+    [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+    public sealed class EventAttribute : Attribute
+    {
+        // See the attribute guidelines at 
+        //  http://go.microsoft.com/fwlink/?LinkId=85236
+        public EventAttribute()
+        {
+        }
+    }  
     
     public interface ICapability
     {

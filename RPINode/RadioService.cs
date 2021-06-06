@@ -17,6 +17,7 @@ namespace RPINode
 {
     public class RadioService : BackgroundService
     {
+        public const string DEVICE_ID = "MyOnlyDevice";
         private readonly ILogger<RadioService> _logger;
         private readonly InternalNodeHubApi _hubApi;
         private readonly CapabilityService _capabilityService;
@@ -36,16 +37,16 @@ namespace RPINode
         
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var descriptor = _capabilityService.RegisterCapability(_blinds);
+            var descriptor = await _capabilityService.RegisterCapability(_blinds);
             
             while (!stoppingToken.IsCancellationRequested)
             {
-                await _hubApi.DeviceOnline("MyOnlyDevice", new[] {descriptor});
+                await _hubApi.DeviceOnline(DEVICE_ID, new[] {descriptor});
                 await Task.Delay(10000, stoppingToken);
             }
 
             //TODO: Unregister device
-            await _hubApi.DeviceOffline("MyOnlyDevice");
+            await _hubApi.DeviceOffline(DEVICE_ID);
         }
     }
 }

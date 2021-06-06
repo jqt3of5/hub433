@@ -1,6 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Client.Receiving;
 using Node.Abstractions;
 
 namespace RPINode
@@ -12,9 +17,22 @@ namespace RPINode
         public CapabilityService(MqttClient mqttClient)
         {
             _mqttClient = mqttClient;
+            _mqttClient.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate(MqttMessageHandler);
         }
 
-        public DeviceCapabilityDescriptor RegisterCapability(ICapability capability)
+        private Task MqttMessageHandler(MqttApplicationMessageReceivedEventArgs message)
+        {
+            //TODO: Route to the proper handler 
+            return Task.CompletedTask;
+        }
+
+        private async Task Subscribe(string topic, MethodInfo methodInfo, object instance) 
+        {
+            await _mqttClient.SubscribeAsync(topic);
+        } 
+       
+
+        public async Task<DeviceCapabilityDescriptor> RegisterCapability(ICapability capability)
         {
             var actionMethods = capability.GetType().GetMethods().Where(info =>
                 info.CustomAttributes.Any(attribute => attribute.AttributeType == typeof(ActionAttribute)));
@@ -25,7 +43,8 @@ namespace RPINode
                 var parameters = actionMethod
                     .GetParameters()
                     .Select(param =>
-                        new DeviceCapabilityDescriptor.ValueDescriptor(param.Name,
+                        new DeviceCapabilityDescriptor.ValueDescriptor(
+                            param.Name,
                             //TODO: Get parameter type
                             DeviceCapabilityDescriptor.ValueDescriptor.TypeEnum.String)
                     ).ToArray();
@@ -36,8 +55,8 @@ namespace RPINode
                     //TODO: get return type
                     DeviceCapabilityDescriptor.ValueDescriptor.TypeEnum.Void
                 );
-                
-                //TODO: Register with mqtt 
+
+                await Subscribe($"action/*/{_mqttClient.Options.ClientId}/{capability.CapabilityId}/{descriptor.Name}", actionMethod, capability); 
                 actions.Add(descriptor);
             }
             
@@ -60,8 +79,8 @@ namespace RPINode
                     //TODO: get the property type 
                     DeviceCapabilityDescriptor.ValueDescriptor.TypeEnum.String);
                 
-                //TODO: Register with mqtt 
-               values.Add(descriptor); 
+                await Subscribe($"value/*/{_mqttClient.Options.ClientId}/{capability.CapabilityId}/{descriptor.Name}", valueProperty.GetMethod, capability); 
+                values.Add(descriptor); 
             }
             
             return new DeviceCapabilityDescriptor(capability.CapabilityId, capability.CapabilityTypeId, values.ToArray(), actions.ToArray());
