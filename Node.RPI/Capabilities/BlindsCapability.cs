@@ -15,20 +15,19 @@ namespace RPINode.Capabilities
         }
         
         [Action]
-        public void Open()
+        public void Open(BlindsDevice.BlindsChannel channel)
         {
-            _blindsDevice.Open();
-        }
-        
-        [Action]
-        public void Close()
-        {
-            _blindsDevice.Close();     
+            _blindsDevice.SendCommand(channel, BlindsDevice.BlindsCommand.Open);
         }
         [Action]
-        public void Stop()
+        public void Close(BlindsDevice.BlindsChannel channel)
         {
-            _blindsDevice.Stop(); 
+            _blindsDevice.SendCommand(channel, BlindsDevice.BlindsCommand.Close);
+        }
+        [Action]
+        public void Stop(BlindsDevice.BlindsChannel channel)
+        {
+            _blindsDevice.SendCommand(channel, BlindsDevice.BlindsCommand.Stop);
         }
     }
 }

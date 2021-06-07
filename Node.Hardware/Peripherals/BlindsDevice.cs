@@ -1,4 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.Intrinsics.Arm;
+using System.Text;
 using System.Threading.Tasks;
 using Unosquare.RaspberryIO.Abstractions;
 
@@ -19,22 +24,42 @@ namespace RPINode.Peripherals
             _repeatPattern = new[] {new RadioSymbol(5000, true), new RadioSymbol(2500, false), new RadioSymbol(1000, true)}; 
         }
 
-        public async Task OpenOneStep()
+        public enum BlindsCommand
         {
+            Up,
+            Down,
+            Stop,
+            Open,
+            Close
+        }
 
-            //                 something    channel            ch crc  co crc 
-            //                     |           |      command      |   |
-            var upCh1   = "11011101001101101 1000 0011 1000 1000 0011 1000 1";
-            var stopCh1 = "11011101001101101 1000 1010 1000 0000 0011 1001 1";
-            var downCh1 = "11011101001101101 1000 1000 1000 1000 0011 0011 1";
-            var upCh2   = "11011101001101101 0100 0011 1000 1000 1101 1000 1";
-            var stopCh2 = "11011101001101101 0100 1010 1000 0000 1101 1001 1";
-            var downCh2 = "11011101001101101 0100 1000 1000 1000 1101 0011 1";
+        public enum BlindsChannel
+        {
+            Channel1,
+            Channel2,
+        }
 
-            var fullUp  = "11011101001101101 0100 0011 1000 0000 1101 0100 1";
-            var fullDon = "11011101001101101 0100 1000 1000 0000 1101 1011 1";
-            
-            
+        public async Task SendCommand(BlindsChannel channel, BlindsCommand blindsCommand)
+        {
+            const string preamble = "11011101001101101";
+
+            (string cmd, string crc) cmdBits = blindsCommand switch
+            {
+                BlindsCommand.Up =>    (cmd : "001110001000", crc : "1000"),
+                BlindsCommand.Down =>  (cmd: "100010001000", crc : "0011"),
+                BlindsCommand.Stop =>  (cmd: "101010000000", crc : "1001"),
+                BlindsCommand.Open =>  (cmd: "001110000000", crc : "0100"),
+                BlindsCommand.Close => (cmd: "100010000000", crc : "1011"),
+                _ => throw new ArgumentOutOfRangeException(nameof(blindsCommand), blindsCommand, null)
+            };
+
+            (string channel , string crc) chBits = channel switch
+            {
+                BlindsChannel.Channel1 => (channel: "1000", crc:"0011"),
+                BlindsChannel.Channel2 => (channel: "0100", crc:"1101")
+            };
+
+            var bits = preamble + chBits.channel + cmdBits.cmd + chBits.crc + cmdBits.crc + "1";
             var data = bits.SelectMany(bit => 
                 bit == '1' ? 
                     new [] {new RadioSymbol(725, true), new RadioSymbol(350, false)} : 
@@ -50,21 +75,6 @@ namespace RPINode.Peripherals
             }
 
             await _transmitter433.Transmit(buffer.ToArray());
-        }
-
-        public async Task OpenFull()
-        {
-            
-        }
-
-        public void Close()
-        {
-            
-        }
-
-        public void Stop()
-        {
-            
         }
     }
 }

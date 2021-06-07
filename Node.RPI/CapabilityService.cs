@@ -23,6 +23,7 @@ namespace RPINode
         private Task MqttMessageHandler(MqttApplicationMessageReceivedEventArgs message)
         {
             //TODO: Route to the proper handler 
+            //TODO: Parse parameters
             return Task.CompletedTask;
         }
 
