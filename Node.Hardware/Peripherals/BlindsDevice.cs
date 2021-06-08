@@ -37,6 +37,10 @@ namespace RPINode.Peripherals
         {
             Channel1,
             Channel2,
+            Channel3,
+            Channel4,
+            Channel5,
+            Channel6,
         }
 
         public async Task SendCommand(BlindsChannel channel, BlindsCommand blindsCommand)
@@ -45,7 +49,7 @@ namespace RPINode.Peripherals
 
             (string cmd, string crc) cmdBits = blindsCommand switch
             {
-                BlindsCommand.Up =>    (cmd : "001110001000", crc : "1000"),
+                BlindsCommand.Up =>    (cmd: "001110001000", crc : "1000"),
                 BlindsCommand.Down =>  (cmd: "100010001000", crc : "0011"),
                 BlindsCommand.Stop =>  (cmd: "101010000000", crc : "1001"),
                 BlindsCommand.Open =>  (cmd: "001110000000", crc : "0100"),
@@ -56,7 +60,11 @@ namespace RPINode.Peripherals
             (string channel , string crc) chBits = channel switch
             {
                 BlindsChannel.Channel1 => (channel: "1000", crc:"0011"),
-                BlindsChannel.Channel2 => (channel: "0100", crc:"1101")
+                BlindsChannel.Channel2 => (channel: "0100", crc:"1101"),
+                BlindsChannel.Channel3 => (channel: "1100", crc:""),
+                BlindsChannel.Channel4 => (channel: "0010", crc:""),
+                BlindsChannel.Channel5 => (channel: "1010", crc:""),
+                BlindsChannel.Channel6 => (channel: "0110", crc:"")
             };
 
             var bits = preamble + chBits.channel + cmdBits.cmd + chBits.crc + cmdBits.crc + "1";

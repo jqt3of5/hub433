@@ -25,7 +25,7 @@ namespace Node.Tests.Console
             var transmitter = new Transmitter433(pin);
             var blinds = new BlindsDevice(transmitter);
 
-            await blinds.OpenOneStep();
+            await blinds.SendCommand(BlindsDevice.BlindsChannel.Channel1, BlindsDevice.BlindsCommand.Open);
            
             
             Setup.GpioTerminate();

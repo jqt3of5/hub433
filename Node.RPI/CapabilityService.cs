@@ -46,15 +46,13 @@ namespace RPINode
                     .Select(param =>
                         new DeviceCapabilityDescriptor.ValueDescriptor(
                             param.Name,
-                            //TODO: Get parameter type
-                            DeviceCapabilityDescriptor.ValueDescriptor.TypeEnum.String)
+                            param.ParameterType.Name)
                     ).ToArray();
                 
                 var descriptor = new DeviceCapabilityDescriptor.ActionDescriptor(
                     actionMethod.Name,
                     parameters,
-                    //TODO: get return type
-                    DeviceCapabilityDescriptor.ValueDescriptor.TypeEnum.Void
+                    actionMethod.ReturnType.Name
                 );
 
                 await Subscribe($"action/*/{_mqttClient.Options.ClientId}/{capability.CapabilityId}/{descriptor.Name}", actionMethod, capability); 
@@ -77,8 +75,7 @@ namespace RPINode
             {
                 var descriptor = new DeviceCapabilityDescriptor.ValueDescriptor(
                     valueProperty.Name,
-                    //TODO: get the property type 
-                    DeviceCapabilityDescriptor.ValueDescriptor.TypeEnum.String);
+                    valueProperty.PropertyType.Name);
                 
                 await Subscribe($"value/*/{_mqttClient.Options.ClientId}/{capability.CapabilityId}/{descriptor.Name}", valueProperty.GetMethod, capability); 
                 values.Add(descriptor); 

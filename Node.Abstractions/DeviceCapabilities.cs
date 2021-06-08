@@ -4,22 +4,14 @@ namespace Node.Abstractions
 {
     public record DeviceCapabilityDescriptor (string CapabilityId, string CapabilityTypeId, DeviceCapabilityDescriptor.ValueDescriptor [] Values, DeviceCapabilityDescriptor.ActionDescriptor [] Actions)
     {
-        public record ActionDescriptor(string Name, ValueDescriptor[] Parameters, ValueDescriptor.TypeEnum ReturnType)
+        public record ActionDescriptor(string Name, ValueDescriptor[] Parameters, string TypeName)
         {
             public string MqttTopic { get; set; }
         }
 
-        public record ValueDescriptor(string Name, ValueDescriptor.TypeEnum Type)
+        public record ValueDescriptor(string Name, string TypeName)
         {
             public string MqttTopic { get; set; }
-            
-            public enum TypeEnum
-            {
-                Int, 
-                String,
-                Float,
-                Void
-            }
         }
     }
 
