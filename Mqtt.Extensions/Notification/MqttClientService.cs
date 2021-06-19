@@ -2,18 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Abstractions;
-using Abstractions.Notification;
-using Abstractions.Peripherals;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
-using Pipelines.Notification;
-using YamlDotNet.Serialization;
 
 namespace mqtt.Notification
 {
@@ -62,7 +58,7 @@ namespace mqtt.Notification
                         break;
                     default:
 
-                        var serialized = _serializer.Serialize(value);
+                        var serialized =  JsonSerializer.Serialize(value);
                         await _client.PublishAsync(topic, serialized);
                         break;
                 }
@@ -75,7 +71,7 @@ namespace mqtt.Notification
             return true;
         }
 
-        private async Task<IDisposable> Subscribe(string route, RouteHandler func)
+        public async Task<IDisposable> Subscribe(string route, RouteHandler func)
         {
             //Convert a "route" (routes can have named path parameters) into a "topic" (topics follow Mqtt.Extensions path formatting. Mainly wildcards are always "+")
             var  topic= Regex
@@ -89,8 +85,12 @@ namespace mqtt.Notification
             //TODO: Remove from trie, store the unsubscriber in the tree?
             return new Unsubscriber(() => _client.UnsubscribeAsync(topic));  
         }
-   
-        public bool Unsubscribe(IDeviceEventClient.RouteHandler func)
+        public bool Unsubscribe(string topic)
+        {
+            //TODO: Need to build this out
+            return false;
+        } 
+        public bool Unsubscribe(RouteHandler func)
         {
             //TODO: Need to build this out
             return false;
@@ -105,11 +105,11 @@ namespace mqtt.Notification
                 foreach (var handler in handlers)
                 {
                     var (path, method) = handler;
-                    
                     //Map actual topic to topic descriptor
                     var pathParts = path.Split('/');
+                    
+                    //Extract the parameters from the topic
                     var handlerParams = new List<string>();
-                    //Fill in any remaining subtopics as parameters
                     for (var i = 0; i < pathParts.Length; ++i)
                     {
                         if (Regex.IsMatch(pathParts[i], "\\{.+\\}") || pathParts[i] == Wildcard)
@@ -117,10 +117,10 @@ namespace mqtt.Notification
                            handlerParams.Add(subtopic[i]); 
                         }
                     }
-
+    
                     try
                     {
-                        var message = new NotificationMessage(eventArgs.ApplicationMessage, handlerParams.ToArray(), _deserializer);
+                        var message = new NotificationMessage(eventArgs.ApplicationMessage, handlerParams.ToArray());
                         var response = method.Invoke(message);
                         if (response != null && !string.IsNullOrEmpty(eventArgs.ApplicationMessage.ResponseTopic))
                         {
@@ -134,23 +134,6 @@ namespace mqtt.Notification
                     }
                 }
             }
-        }
-
-        public IDisposable SubscribeToDevicePropChange(string deviceName, string property, IDeviceEventClient.RouteHandler func)
-        {
-            return Subscribe($"{_deviceId}/{deviceName}/{property}", func).Result;
-        }
-        public IDisposable SubscribeToConfigChange(IDeviceEventClient.RouteHandler func)
-        {
-            return Subscribe($"{_deviceId}/config", func).Result;
-        }
-        public Task<bool> PublishReading(string deviceName, ReadEvent value)
-        {
-            return PublishInternal($"{_deviceId}/{deviceName}/reading", value);
-        }
-        public Task<bool> PublishDevices(List<PhysicalDevice> devices)
-        {
-            return PublishInternal($"{_deviceId}/devices", devices);
         }
     }
 }
