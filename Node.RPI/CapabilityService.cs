@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using mqtt.Notification;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Receiving;
@@ -12,27 +14,20 @@ namespace RPINode
 {
     public class CapabilityService
     {
-        private readonly MqttClient _mqttClient;
+        private readonly MqttClientService _mqttClientService;
 
-        public CapabilityService(MqttClient mqttClient)
+        public CapabilityService(MqttClientService mqttClientService)
         {
-            _mqttClient = mqttClient;
-            _mqttClient.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate(MqttMessageHandler);
+            _mqttClientService = mqttClientService;
         }
 
-        private Task MqttMessageHandler(MqttApplicationMessageReceivedEventArgs message)
+        public async IAsyncEnumerable<DeviceCapabilityDescriptor> RegisterCapabilities(params ICapability[] capabilities)
         {
-            //TODO: Route to the proper handler 
-            //TODO: Parse parameters
-            return Task.CompletedTask;
+            foreach (var capability in capabilities)
+            {
+               yield return await RegisterCapability(capability);
+            }
         }
-
-        private async Task Subscribe(string topic, MethodInfo methodInfo, object instance) 
-        {
-            await _mqttClient.SubscribeAsync(topic);
-        } 
-       
-
         public async Task<DeviceCapabilityDescriptor> RegisterCapability(ICapability capability)
         {
             var actionMethods = capability.GetType().GetMethods().Where(info =>
@@ -55,7 +50,9 @@ namespace RPINode
                     actionMethod.ReturnType.Name
                 );
 
-                await Subscribe($"action/*/{_mqttClient.Options.ClientId}/{capability.CapabilityId}/{descriptor.Name}", actionMethod, capability); 
+                await _mqttClientService.Subscribe(
+                    $"action/*/{_mqttClientService.DeviceId}/{capability.CapabilityId}/{descriptor.Name}",
+                    (message) => InvokeWithMappedParameters(message, actionMethod, capability));
                 actions.Add(descriptor);
             }
             
@@ -77,11 +74,51 @@ namespace RPINode
                     valueProperty.Name,
                     valueProperty.PropertyType.Name);
                 
-                await Subscribe($"value/*/{_mqttClient.Options.ClientId}/{capability.CapabilityId}/{descriptor.Name}", valueProperty.GetMethod, capability); 
+                await _mqttClientService.Subscribe(
+                    $"value/*/{_mqttClientService.DeviceId}/{capability.CapabilityId}/{descriptor.Name}",
+                    (message) => InvokeWithMappedParameters(message, valueProperty.GetMethod, capability)); 
+                
                 values.Add(descriptor); 
             }
             
             return new DeviceCapabilityDescriptor(capability.CapabilityId, capability.CapabilityTypeId, values.ToArray(), actions.ToArray());
         }
+
+        /// <summary>
+        /// Maps the parametesrs of the method to the list of values in the message, then invokes the method
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="method"></param>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        private object? InvokeWithMappedParameters(MqttClientService.NotificationMessage message, MethodInfo method,
+            object instance)
+        {
+            var stringArguments = message.GetPayload<string[]>();
+            var parameters = method.GetParameters();
+            if (parameters.Length > stringArguments.Length)
+            {
+                //we cannot invoke the method if we don't have enough arguments
+                return null;
+            }
+
+            var typeConverter = new TypeConverter();
+            List<object> arguments = new List<object>();
+            for (int i = 0; i < parameters.Length; ++i)
+            {
+                var argument = typeConverter.ConvertTo(stringArguments[i], parameters[i].ParameterType);
+                arguments.Add(argument);
+            }
+
+            try
+            {
+                return method.Invoke(instance, arguments.ToArray());
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+        
     }
 }

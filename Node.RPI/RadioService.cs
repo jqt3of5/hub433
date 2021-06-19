@@ -40,11 +40,11 @@ namespace RPINode
         
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var descriptor = await _capabilityService.RegisterCapability(_blinds);
+            var descriptor = await _capabilityService.RegisterCapabilities(_blinds).ToArrayAsync(stoppingToken); //, _receiver433, _transmitter433);
             
             while (!stoppingToken.IsCancellationRequested)
             {
-                await _hubApi.DeviceOnline(DEVICE_ID, new[] {descriptor});
+                await _hubApi.DeviceOnline(DEVICE_ID, descriptor);
                 await Task.Delay(10000, stoppingToken);
             }
 

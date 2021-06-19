@@ -10,17 +10,36 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
+using MQTTnet.Client.Subscribing;
+using MQTTnet.Client.Unsubscribing;
 
 namespace mqtt.Notification
 {
     public class MqttClientService : IMqttApplicationMessageReceivedHandler
     {
-        public delegate object? RouteHandler(MqttApplicationMessage message);
+        public class NotificationMessage
+        {
+            public MqttApplicationMessage InternalMessage { get; }
+            public string [] PathParams { get; }
+
+            public O GetPayload<O>()
+            {
+                return JsonSerializer.Deserialize<O>(InternalMessage.ConvertPayloadToString());
+            }
+        
+            public NotificationMessage(MqttApplicationMessage message, string[] pathParams)
+            {
+                InternalMessage = message;
+                PathParams = pathParams;
+            }
+        }
+        
+        public delegate object? RouteHandler(NotificationMessage message);
         public const string Wildcard = "+";
         
         public readonly TrieNode<(string, RouteHandler)> RouteTrie = new(); 
         
-        private readonly string _deviceId;
+        public string DeviceId { get; }
         
         private readonly IMqttClient _client;
 
@@ -31,14 +50,14 @@ namespace mqtt.Notification
         }
         public MqttClientService(string deviceId, IMqttClient client)
         {
-            _deviceId = deviceId;
+            DeviceId = deviceId;
             _client = client;
         }
 
         public async Task Connect(string host)
         {
             var options = new MqttClientOptionsBuilder()
-                            .WithClientId(_deviceId)
+                            .WithClientId(DeviceId)
                             //Must be version 500 so that response topics work
                             // .WithProtocolVersion(MqttProtocolVersion.V500)
                             .WithTcpServer(host)
@@ -71,7 +90,7 @@ namespace mqtt.Notification
             return true;
         }
 
-        public async Task<IDisposable> Subscribe(string route, RouteHandler func)
+        public async Task<bool> Subscribe(string route, RouteHandler func)
         {
             //Convert a "route" (routes can have named path parameters) into a "topic" (topics follow Mqtt.Extensions path formatting. Mainly wildcards are always "+")
             var  topic= Regex
@@ -81,38 +100,37 @@ namespace mqtt.Notification
             var result = await _client.SubscribeAsync(topic);
          
             RouteTrie.AddValue(topic, (route, func));
-            
-            //TODO: Remove from trie, store the unsubscriber in the tree?
-            return new Unsubscriber(() => _client.UnsubscribeAsync(topic));  
+
+            return result.Items.Any(item => item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS0
+                                            || item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS1
+                                            || item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS2);
+
         }
-        public bool Unsubscribe(string topic)
+        public async Task<bool> Unsubscribe(string topic)
         {
-            //TODO: Need to build this out
-            return false;
+            //TODO: Remove from trie
+            var result = await _client.UnsubscribeAsync(topic);
+            return result.Items.Any(item => item.ReasonCode != MqttClientUnsubscribeResultCode.Success);
         } 
-        public bool Unsubscribe(RouteHandler func)
-        {
-            //TODO: Need to build this out
-            return false;
-        }
 
         public async Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs eventArgs)
         {
-            var subtopic = eventArgs.ApplicationMessage.Topic.Split('/').ToArray();
             
-            if (RouteTrie.TryGetValue(subtopic, out var handlers))
+            if (RouteTrie.TryGetValue(eventArgs.ApplicationMessage.Topic, out var handlers))
             {
-                foreach (var handler in handlers)
+                foreach (var (path, method) in handlers)
                 {
-                    var (path, method) = handler;
                     //Map actual topic to topic descriptor
                     var pathParts = path.Split('/');
                     
                     //Extract the parameters from the topic
+                    
+                    var subtopic = eventArgs.ApplicationMessage.Topic.Split('/').ToArray();
                     var handlerParams = new List<string>();
                     for (var i = 0; i < pathParts.Length; ++i)
                     {
-                        if (Regex.IsMatch(pathParts[i], "\\{.+\\}") || pathParts[i] == Wildcard)
+                        //It's possible for the path to have {} as a part - but because there is no name, we will consider it a throw away wildcard and not match it
+                        if (Regex.IsMatch(pathParts[i], "\\{.+\\}"))//Don't pass if the wild card is specified || pathParts[i] == Wildcard)
                         {
                            handlerParams.Add(subtopic[i]); 
                         }

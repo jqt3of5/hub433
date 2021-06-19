@@ -2,15 +2,23 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
 using mqtt.Notification;
 
 namespace mqtt
 {
   public class TrieNode<T> : IEnumerable<T>
     {
-        public string TopicLevel { get; init; } = string.Empty;
-       public List<T> Values { get; } = new List<T>();
-       public List<TrieNode<T>> ChildNodes { get; } = new List<TrieNode<T>>();
+        /// <summary>
+        /// The particular part of the path this node represents
+        /// </summary>
+        public string TopicPart { get; init; } = string.Empty;
+        /// <summary>
+        /// The actual values stored at this node
+        /// </summary>
+       public List<T> Values { get; } = new();
+       public List<TrieNode<T>> ChildNodes { get; } = new();
        
        public IEnumerator<T> GetEnumerator()
        {
@@ -34,39 +42,52 @@ namespace mqtt
        }
     }
 
-    public static class TrieExtensions 
+    public static class TrieExtensions
     {
+        private static (X, X[]) Head<X>(this IEnumerable<X> list) => (list!.First(), list!.Skip(1).ToArray());
         
-        public static void AddValue<T>(this TrieNode<T> node, string path, T value)
+        /// <summary>
+        ///  
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="path">The path to the resource with each level delineated by 'delimitor'. May include wildcard characters +, * or {var}</param>
+        /// <param name="value"></param>
+        /// <param name="delimitor"></param>
+        /// <typeparam name="T"></typeparam>
+        public static void AddValue<T>(this TrieNode<T> node, string path, T value, char delimitor = '/')
         {
             var prefixes = path
-                .Split('/')
+                .Split(delimitor)
                 .ToArray();
-            AddValue(node,prefixes, value);
             
+            AddValue(node,prefixes, value);
         }
-        private static void AddValue<T>(this TrieNode<T> node, string[] path, T value)
+        
+        private static void AddValue<T>(this TrieNode<T> node, string[] pathParts, T value)
         {
-            //Once we're out of path's, then we're at a leaf node, and this should have the handle
-            if (path.Length == 0)
+            //Once we're out of path's, then we've reached the destination node, and this should have the handle
+            if (pathParts.Length == 0)
             {
                 node.Values.Add(value);
                 return;
             }
+            
+            var (head, tail) = pathParts.Head();
+            
             //Search through the children to find the one that matches
             foreach (var childNode in node.ChildNodes)
             {
-                if (childNode.TopicLevel == path.First())
+                if (childNode.TopicPart == head)
                 {
-                    childNode.AddValue(path.Skip(1).ToArray(), value);
+                    childNode.AddValue(tail, value);
                     return;
                 }
             }
             
             //If none match, create a new child
-            var child = new TrieNode<T>() {TopicLevel = path.First()};
+            var child = new TrieNode<T>() {TopicPart = head};
             node.ChildNodes.Add(child);
-            child.AddValue(path.Skip(1).ToArray(), value);
+            child.AddValue(tail, value);
         }
 
         public static bool TryGetValue<T>(this TrieNode<T> node, string path, out T[] values)
@@ -76,6 +97,7 @@ namespace mqtt
                 .ToArray();
             return TryGetValue(node, prefixes, out values); 
         }
+        
         public static bool TryGetValue<T>(this TrieNode<T> node, string[] path, out T[] values)
         {
             if (path.Length == 0)
@@ -83,25 +105,27 @@ namespace mqtt
                 values = node.Values.ToArray();
                 return true;
             }
-            
+
+            var (head, tail) = path.Head();
             //Search through the childnodes to find exact matches first
             foreach (var childNode in node.ChildNodes)
             {
-                if (childNode.TopicLevel == path.First())
+                if (childNode.TopicPart == head)
                 {
-                    if (childNode.TryGetValue<T>(path.Skip(1).ToArray(), out values))
+                    if (childNode.TryGetValue<T>(tail, out values))
                     {
                         return true;
                     }
                 }
             }
-
+            
+            //TODO: admittedly, not my favorite placement for this method, the trie node should probalby have this. 
+            bool IsWildCard(string part) => part == "*" || part == MqttClientService.Wildcard || Regex.IsMatch(part, @"\{.*\}");
+            
             //If there is a wildcard route, follow that
-            var wildcardRoute = node.ChildNodes.FirstOrDefault(node => node.TopicLevel == MqttClientService.Wildcard);
-
-            if (wildcardRoute != null)
+            if (node.ChildNodes.FirstOrDefault(node => IsWildCard(node.TopicPart)) is {} wildCardRoute)
             {
-                return wildcardRoute.TryGetValue<T>(path.Skip(1).ToArray(), out values);
+                return wildCardRoute.TryGetValue(tail, out values);
             }
             
             values = Array.Empty<T>();
