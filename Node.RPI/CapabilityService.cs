@@ -14,9 +14,9 @@ namespace RPINode
 {
     public class CapabilityService
     {
-        private readonly MqttClientService _mqttClientService;
+        private readonly IMqttClientService _mqttClientService;
 
-        public CapabilityService(MqttClientService mqttClientService)
+        public CapabilityService(IMqttClientService mqttClientService)
         {
             _mqttClientService = mqttClientService;
         }
@@ -28,97 +28,39 @@ namespace RPINode
                yield return await RegisterCapability(capability);
             }
         }
+        
         public async Task<DeviceCapabilityDescriptor> RegisterCapability(ICapability capability)
         {
-            var actionMethods = capability.GetType().GetMethods().Where(info =>
-                info.CustomAttributes.Any(attribute => attribute.AttributeType == typeof(ActionAttribute)));
-            
-            var actions = new List<DeviceCapabilityDescriptor.ActionDescriptor>();
-            foreach (var actionMethod in actionMethods)
-            {
-                var parameters = actionMethod
-                    .GetParameters()
-                    .Select(param =>
-                        new DeviceCapabilityDescriptor.ValueDescriptor(
-                            param.Name,
-                            param.ParameterType.Name)
-                    ).ToArray();
-                
-                var descriptor = new DeviceCapabilityDescriptor.ActionDescriptor(
-                    actionMethod.Name,
-                    parameters,
-                    actionMethod.ReturnType.Name
-                );
+            var descriptor = CapabilityDescriber.Describe(capability);
 
-                await _mqttClientService.Subscribe(
-                    $"action/*/{_mqttClientService.DeviceId}/{capability.CapabilityId}/{descriptor.Name}",
-                    (message) => InvokeWithMappedParameters(message, actionMethod, capability));
-                actions.Add(descriptor);
-            }
-            
-            var valueProperties = capability
-                .GetType()
-                .GetProperties()
-                .Where(info =>
-                    info
-                        .CustomAttributes
-                        .Any(attribute => 
-                                attribute.AttributeType == typeof(ValueAttribute)
-                            )
-                    ); 
-            
-            var values = new List<DeviceCapabilityDescriptor.ValueDescriptor>();
-            foreach (var valueProperty in valueProperties)
+            foreach (var action in descriptor.Actions)
             {
-                var descriptor = new DeviceCapabilityDescriptor.ValueDescriptor(
-                    valueProperty.Name,
-                    valueProperty.PropertyType.Name);
-                
-                await _mqttClientService.Subscribe(
-                    $"value/*/{_mqttClientService.DeviceId}/{capability.CapabilityId}/{descriptor.Name}",
-                    (message) => InvokeWithMappedParameters(message, valueProperty.GetMethod, capability)); 
-                
-                values.Add(descriptor); 
+                action.MqttTopic = $"action/+/{_mqttClientService.DeviceId}/{capability.CapabilityId}/{action.Name}"; 
+                if (!await _mqttClientService.Subscribe(
+                    action.MqttTopic,
+                    action.Method,
+                    capability))
+                {
+                    //TODO: Failure to subscribe??
+                }
             }
+
+            foreach (var property in descriptor.Properties)
+            {
+                property.MqttTopic = $"value/+/{_mqttClientService.DeviceId}/{capability.CapabilityId}/{property.Name}";
             
-            return new DeviceCapabilityDescriptor(capability.CapabilityId, capability.CapabilityTypeId, values.ToArray(), actions.ToArray());
+                if (!await _mqttClientService.Subscribe(
+                    property.MqttTopic,
+                    property.Property.GetMethod,
+                    capability))
+                    //TODO: What about set method?
+                {
+                    //TODO: fialure
+                } 
+            }
+            //TODO: Register events
+
+            return descriptor;
         }
-
-        /// <summary>
-        /// Maps the parametesrs of the method to the list of values in the message, then invokes the method
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="method"></param>
-        /// <param name="instance"></param>
-        /// <returns></returns>
-        private object? InvokeWithMappedParameters(MqttClientService.NotificationMessage message, MethodInfo method,
-            object instance)
-        {
-            var stringArguments = message.GetPayload<string[]>();
-            var parameters = method.GetParameters();
-            if (parameters.Length > stringArguments.Length)
-            {
-                //we cannot invoke the method if we don't have enough arguments
-                return null;
-            }
-
-            var typeConverter = new TypeConverter();
-            List<object> arguments = new List<object>();
-            for (int i = 0; i < parameters.Length; ++i)
-            {
-                var argument = typeConverter.ConvertTo(stringArguments[i], parameters[i].ParameterType);
-                arguments.Add(argument);
-            }
-
-            try
-            {
-                return method.Invoke(instance, arguments.ToArray());
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-        
     }
 }

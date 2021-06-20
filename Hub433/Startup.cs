@@ -24,6 +24,11 @@ namespace Hub433
             services.AddControllers();
             services.AddSignalR();
             services.AddHostedService<MqttHostedService>();
+
+            // var server = new MqttFactory().CreateMqttServer();
+            // server.StartAsync(new MqttServerOptions()).Wait();
+            // services.AddSingleton(server);
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

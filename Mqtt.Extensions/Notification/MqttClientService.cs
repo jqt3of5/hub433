@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
@@ -15,7 +16,15 @@ using MQTTnet.Client.Unsubscribing;
 
 namespace mqtt.Notification
 {
-    public class MqttClientService : IMqttApplicationMessageReceivedHandler
+    public interface IMqttClientService
+    {
+        public string DeviceId { get; }
+        public Task Connect(string host);
+        public Task<bool> Subscribe(string route, MqttClientService.RouteHandler func);
+        public Task<bool> Subscribe(string route, MethodInfo method, object instance);
+    }
+    
+    public class MqttClientService : IMqttClientService, IMqttApplicationMessageReceivedHandler
     {
         public class NotificationMessage
         {
@@ -106,6 +115,60 @@ namespace mqtt.Notification
                                             || item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS2);
 
         }
+        
+        public async Task<bool> Subscribe(string route, MethodInfo method, object instance)
+        {
+            //Convert a "route" (routes can have named path parameters) into a "topic" (topics follow Mqtt.Extensions path formatting. Mainly wildcards are always "+")
+            var  topic= Regex
+                .Replace(route, "\\{.+\\}", Wildcard)
+                .Trim('/'); 
+
+            var result = await _client.SubscribeAsync(topic);
+
+            RouteHandler func = message => InvokeWithMappedParameters(message, method, instance);
+            RouteTrie.AddValue(topic, (route, func));
+
+            return result.Items.Any(item => item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS0
+                                            || item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS1
+                                            || item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS2);
+
+        } 
+        /// <summary>
+        /// Maps the parametesrs of the method to the list of values in the message, then invokes the method
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="method"></param>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        private object? InvokeWithMappedParameters(MqttClientService.NotificationMessage message, MethodInfo method,
+            object instance)
+        {
+            var stringArguments = message.GetPayload<string[]>();
+            var parameters = method.GetParameters();
+            if (parameters.Length > stringArguments.Length)
+            {
+                //we cannot invoke the method if we don't have enough arguments
+                return null;
+            }
+
+            var typeConverter = new TypeConverter();
+            List<object> arguments = new List<object>();
+            for (int i = 0; i < parameters.Length; ++i)
+            {
+                var argument = typeConverter.ConvertTo(stringArguments[i], parameters[i].ParameterType);
+                arguments.Add(argument);
+            }
+
+            try
+            {
+                return method.Invoke(instance, arguments.ToArray());
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         public async Task<bool> Unsubscribe(string topic)
         {
             //TODO: Remove from trie

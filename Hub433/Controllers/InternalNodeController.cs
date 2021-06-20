@@ -6,6 +6,7 @@ using Node.Abstractions;
 namespace Hub433.Controllers
 {
     //Endpoints used by the nodes themselves, to publish certain status/etc
+    [Route("internalnode")]
     [ApiController]
     public class InternalNodeController : Controller
     {
@@ -17,8 +18,8 @@ namespace Hub433.Controllers
         } 
         
         [HttpPost]
-        [Route("node/{nodeGuid}/claim")]
-        IActionResult ClaimDevice(string nodeGuid, [FromBody] string claimCode)
+        [Route("{nodeGuid}/claim")]
+        public IActionResult ClaimDevice(string nodeGuid, [FromBody] string claimCode)
         {
             //Called by the device
             //authenticate device (client Certificates maybe?)
@@ -30,16 +31,17 @@ namespace Hub433.Controllers
         }
 
         [HttpPost]
-        [Route("node/{nodeGuid}/online")]
-        IActionResult DeviceOnline(string nodeGuid, [FromBody] DeviceCapabilityDescriptor[]? deviceCapabilities)
+        [HttpGet]
+        [Route("{nodeGuid}/online")]
+        public IActionResult DeviceOnline(string nodeGuid, [FromBody] DeviceCapabilityDescriptor[]? deviceCapabilities)
         {
             _repo.DeviceOnline(nodeGuid, deviceCapabilities);
             return Ok();
         }
         
         [HttpPost]
-        [Route("node/{nodeGuid}/offline")]
-        IActionResult DeviceOffline(string nodeGuid)
+        [Route("{nodeGuid}/offline")]
+        public IActionResult DeviceOffline(string nodeGuid)
         {
             _repo.DeviceOffline(nodeGuid);
             return Ok();

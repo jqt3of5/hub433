@@ -7,6 +7,7 @@ using Unosquare.PiGpio;
 using Unosquare.PiGpio.NativeEnums;
 using Unosquare.RaspberryIO;
 using Unosquare.RaspberryIO.Abstractions;
+using BootstrapPiGpio = Node.Hardware.BootstrapPiGpio;
 
 namespace Node.Tests
 {
@@ -22,7 +23,7 @@ namespace Node.Tests
         public async Task TransmitBitPatterns()
         {
             var pin = Board.Pins[UserGpio.Bcm17];
-            var transmitter = new Transmitter433(pin);
+            var transmitter = new Transmitter433(new BootstrapPiGpio.PiGpioController.PiGpioPin(pin));
 
             var bits = "10101010";
             var symbols = bits.SelectMany(bit => 

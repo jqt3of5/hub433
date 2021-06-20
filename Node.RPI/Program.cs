@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using mqtt.Notification;
 using MQTTnet.Client;
+using Node.Abstractions;
 using Unosquare.PiGpio;
 using Unosquare.PiGpio.ManagedModel;
 using Unosquare.PiGpio.NativeMethods;
@@ -25,16 +26,16 @@ namespace RPINode
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureServices((hostContext, services) =>
+                .ConfigureServices(async (hostContext, services) =>
                 {
-                    services.AddSingleton(Pi.Gpio);
-                    services.AddSingleton(Board.Pins);
-                    services.AddHostedService<RadioService>();
-                    
-                    var mqtt = MqttClientService.Create(deviceId: "qwerty");
-                    mqtt.Connect("localhost");
+                    var mqtt = MqttClientService.Create(deviceId: RadioService.DEVICE_ID);
+                    mqtt.Connect("localhost").Wait();
                     services.AddSingleton(mqtt);
                     
+                    services.AddSingleton(Pi.Gpio);
+                    services.AddHostedService<RadioService>();
+                    services.AddSingleton<CapabilityService>();
+                    services.AddSingleton<InternalNodeHubApi>();
                 });
     }
 }

@@ -12,14 +12,14 @@ namespace RPINode
     
     public class Transmitter433
     {
-        private readonly GpioPin _pin;
-        public int BcmPin => _pin.PinNumber;
+        private readonly IGpioPin _pin;
+        public int BcmPin => _pin.BcmPinNumber;
 
-        public Transmitter433(GpioPin pin)
+        public Transmitter433(IGpioPin pin)
         {
             _pin = pin;
-            pin.PullMode = GpioPullMode.Up;
-            pin.Direction = PinDirection.Output;
+            pin.InputPullMode = GpioPinResistorPullMode.PullUp;
+            pin.PinMode = GpioPinDriveMode.Output;
             pin.Value = false;
         }
 

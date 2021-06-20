@@ -9,12 +9,12 @@ namespace RPINode
 {
     public class Receiver433
     {
-        private readonly GpioPin _pin;
+        private readonly IGpioPin _pin;
 
-        public Receiver433(GpioPin pin)
+        public Receiver433(IGpioPin pin)
         {
             _pin = pin;
-            _pin.Direction = PinDirection.Input;
+            _pin.PinMode = GpioPinDriveMode.Input;
         }
 
         public RadioSymbol[] Receive(TimeSpan timeout)

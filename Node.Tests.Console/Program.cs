@@ -7,6 +7,9 @@ using RPINode.Peripherals;
 using Unosquare.PiGpio;
 using Unosquare.PiGpio.NativeEnums;
 using Unosquare.PiGpio.NativeMethods;
+using Unosquare.RaspberryIO;
+using Unosquare.RaspberryIO.Abstractions;
+using BootstrapPiGpio = Node.Hardware.BootstrapPiGpio;
 
 namespace Node.Tests.Console
 {
@@ -14,20 +17,14 @@ namespace Node.Tests.Console
     {
         static async Task Main(string[] args)
         {
-            if (Setup.GpioInitialise() < 0)
-            {
-                System.Console.WriteLine("Failed to initialize. was your libpigpio.so built from a raspberrypi 4?");
-                Setup.GpioTerminate();
-                return;
-            }
-
-            var pin = Board.Pins[UserGpio.Bcm17];
+            Pi.Init<BootstrapPiGpio>();
+            
+            var pin = Pi.Gpio[BcmPin.Gpio17];
             var transmitter = new Transmitter433(pin);
             var blinds = new BlindsDevice(transmitter);
 
             await blinds.SendCommand(BlindsDevice.BlindsChannel.Channel1, BlindsDevice.BlindsCommand.Open);
            
-            
             Setup.GpioTerminate();
         }
     }
