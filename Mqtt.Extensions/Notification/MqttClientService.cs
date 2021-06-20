@@ -44,6 +44,7 @@ namespace mqtt.Notification
         }
         
         public delegate object? RouteHandler(NotificationMessage message);
+        
         public const string Wildcard = "+";
         
         public readonly TrieNode<(string, RouteHandler)> RouteTrie = new(); 
@@ -113,25 +114,22 @@ namespace mqtt.Notification
             return result.Items.Any(item => item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS0
                                             || item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS1
                                             || item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS2);
-
+        }
+        public Task<bool> Subscribe(string route, Func<string[], object> method)
+        {
+            RouteHandler func = message => method.Invoke(message.GetPayload<string[]>());
+            return Subscribe(route, func); 
         }
         
-        public async Task<bool> Subscribe(string route, MethodInfo method, object instance)
+        public Task<bool> Subscribe(string route, MethodInfo method, object instance)
         {
-            //Convert a "route" (routes can have named path parameters) into a "topic" (topics follow Mqtt.Extensions path formatting. Mainly wildcards are always "+")
-            var  topic= Regex
-                .Replace(route, "\\{.+\\}", Wildcard)
-                .Trim('/'); 
-
-            var result = await _client.SubscribeAsync(topic);
+            if (method == null)
+            {
+                return Task.FromResult(false);
+            }
 
             RouteHandler func = message => InvokeWithMappedParameters(message, method, instance);
-            RouteTrie.AddValue(topic, (route, func));
-
-            return result.Items.Any(item => item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS0
-                                            || item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS1
-                                            || item.ResultCode != MqttClientSubscribeResultCode.GrantedQoS2);
-
+            return Subscribe(route, func);
         } 
         /// <summary>
         /// Maps the parametesrs of the method to the list of values in the message, then invokes the method
@@ -143,6 +141,11 @@ namespace mqtt.Notification
         private object? InvokeWithMappedParameters(MqttClientService.NotificationMessage message, MethodInfo method,
             object instance)
         {
+            //TODO: This can be improved in a couple of ways....
+            //since this is deserializing as a string array, each element must be a string in the JSON. Then we type convert later
+            //If we deserialized as an object array, we would get JsonElements, which we can then convert/type check into the method parameters. 
+            //allowing a bit more flexibility in the JSON format
+            //OR we can convert to a dictionary and mapped named parameters.  
             var stringArguments = message.GetPayload<string[]>();
             var parameters = method.GetParameters();
             if (parameters.Length > stringArguments.Length)
@@ -151,22 +154,14 @@ namespace mqtt.Notification
                 return null;
             }
 
-            var typeConverter = new TypeConverter();
             List<object> arguments = new List<object>();
             for (int i = 0; i < parameters.Length; ++i)
             {
-                var argument = typeConverter.ConvertTo(stringArguments[i], parameters[i].ParameterType);
+                var argument = TypeDescriptor.GetConverter(parameters[i].ParameterType).ConvertFromString(stringArguments[i]);
                 arguments.Add(argument);
             }
 
-            try
-            {
-                return method.Invoke(instance, arguments.ToArray());
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            return method.Invoke(instance, arguments.ToArray());
         }
 
         public async Task<bool> Unsubscribe(string topic)
@@ -212,6 +207,8 @@ namespace mqtt.Notification
                     catch (Exception e)
                     {
                         Console.WriteLine($"Error while handling Mqtt topic: {e}");
+                        //TODO: What should the error handling be? this can be bad types, incorrect number of arguments, etc. It just swallows any error and doesn't acknowledge
+                        // await _client.PublishAsync(eventArgs.ApplicationMessage.ResponseTopic, response);
                     }
                 }
             }
