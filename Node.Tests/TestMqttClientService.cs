@@ -62,8 +62,9 @@ namespace Node.Tests
                 didCall = true;                 
                 return null;
             }).Wait();
+            
 
-            var payload =  Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new[] {"test"}));
+            var payload =  Encoding.UTF8.GetBytes(System.Text.Json.JsonSerializer.Serialize(new[] {"test"}));
             mqtt.HandleApplicationMessageReceivedAsync(new MqttApplicationMessageReceivedEventArgs("qwerty",
                 new MqttApplicationMessage() {Payload = payload, Topic = "a/b/c"})).Wait();
            

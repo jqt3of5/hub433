@@ -11,6 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Mqtt.Extensions\Mqtt.Extensions.csproj" />
       <ProjectReference Include="..\Node.Abstractions\Node.Abstractions.csproj" />
     </ItemGroup>
 

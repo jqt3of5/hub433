@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Hub433.Busi;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
+using mqtt.Notification;
+using MQTTnet;
+using Newtonsoft.Json;
 using Node.Abstractions;
 
 namespace Hub433.Controllers
@@ -13,9 +18,12 @@ namespace Hub433.Controllers
     public class NodesController : Controller
     {
         private readonly NodeRepo _repo;
-        public NodesController(NodeRepo repo)
+        private readonly MqttClientService _mqtt;
+
+        public NodesController(NodeRepo repo, MqttClientService mqtt)
         {
             _repo = repo;
+            _mqtt = mqtt;
         }
 
         [HttpGet]
@@ -72,8 +80,8 @@ namespace Hub433.Controllers
         
         [HttpGet]
         [HttpPost]
-        [Route("node/{nodeGuid}/action/{actionName}")]
-        public IActionResult InvokeAction(string nodeGuid, string actionName, [FromBody]string[] parameters)
+        [Route("node/{nodeGuid}/action/{capabilityId}/{actionName}")]
+        public async Task<IActionResult> InvokeAction(string nodeGuid, string capabilityId, string actionName, [FromBody]string[] parameters)
         {
             //TODO: Are we allowed to send these bytes to this device?
             if (!_repo.DoesNodeExist(nodeGuid))
@@ -84,7 +92,18 @@ namespace Hub433.Controllers
             try
             {
                 var node = _repo.GetDevice(nodeGuid);
-                // _hubContext.Clients.Client(node.NodeClientConnectionId).SendAsync(actionName, parameters.First());
+                var capability = node.DeviceCapabilities.FirstOrDefault(cap => cap.CapabilityId == capabilityId);
+                if (capability != null)
+                {
+                    var action = capability.Actions.FirstOrDefault(act => act.Name == actionName);
+                    if (action != null)
+                    {
+                        var body = System.Text.Json.JsonSerializer.Serialize(parameters);
+                        //This will wait for a response until the client disconnects. SignalR might be a better mechanism for this possibly long running response, but this will work for now. 
+                        var result = await _mqtt.PublishWithResult(action.MqttTopic, body, HttpContext.RequestAborted);
+                        return Ok(result); 
+                    }
+                }
             }
             catch (Exception e)
             {

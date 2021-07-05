@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Text.Unicode;
 using System.Threading;
 using System.Threading.Tasks;
 using MQTTnet;
@@ -22,6 +24,8 @@ namespace mqtt.Notification
         public Task Connect(string host);
         public Task<bool> Subscribe(string route, MqttClientService.RouteHandler func);
         public Task<bool> Subscribe(string route, MethodInfo method, object instance);
+        public Task Publish(string topic, string body);
+        public Task<string> PublishWithResult(string topic, string body, CancellationToken token);
     }
     
     public class MqttClientService : IMqttClientService, IMqttApplicationMessageReceivedHandler
@@ -130,7 +134,43 @@ namespace mqtt.Notification
 
             RouteHandler func = message => InvokeWithMappedParameters(message, method, instance);
             return Subscribe(route, func);
-        } 
+        }
+
+        public Task Publish(string topic, string body)
+        {
+            return _client.PublishAsync(topic, payload: body);
+        }
+
+        public async Task<string?> PublishWithResult(string topic, string body, CancellationToken token)
+        {
+            var tcs = new TaskCompletionSource<string>();
+            var responseTopic = GenerateResponseTopic();
+            await Subscribe(responseTopic, (NotificationMessage message) =>
+            {
+                tcs.SetResult(message.GetPayload<string>());    
+                return null;
+            });
+            
+            await _client.PublishAsync(new MqttApplicationMessage()
+                {Topic = topic, Payload = Encoding.UTF8.GetBytes(body), ResponseTopic = responseTopic});
+
+            tcs.Task.Wait(token);
+
+            await Unsubscribe(responseTopic);
+            
+            if (token.IsCancellationRequested)
+            {
+                return null;
+            }
+
+            return tcs.Task.Result;
+        }
+
+        private string GenerateResponseTopic()
+        {
+            return $"{DeviceId}/{Guid.NewGuid()}";
+        }
+
         /// <summary>
         /// Maps the parametesrs of the method to the list of values in the message, then invokes the method
         /// </summary>
@@ -164,9 +204,14 @@ namespace mqtt.Notification
             return method.Invoke(instance, arguments.ToArray());
         }
 
+        /// <summary>
+        /// WARNING: This method will unsubscribe all local listeners from this topic. 
+        /// </summary>
+        /// <param name="topic"></param>
+        /// <returns></returns>
         public async Task<bool> Unsubscribe(string topic)
         {
-            //TODO: Remove from trie
+            RouteTrie.DeletePathValues(topic);
             var result = await _client.UnsubscribeAsync(topic);
             return result.Items.Any(item => item.ReasonCode != MqttClientUnsubscribeResultCode.Success);
         } 
@@ -198,17 +243,18 @@ namespace mqtt.Notification
                     {
                         var message = new NotificationMessage(eventArgs.ApplicationMessage, handlerParams.ToArray());
                         var response = method.Invoke(message);
-                        if (response != null && !string.IsNullOrEmpty(eventArgs.ApplicationMessage.ResponseTopic))
+                        if (!string.IsNullOrEmpty(eventArgs.ApplicationMessage.ResponseTopic))
                         {
-                            //TODO: return values from handlers for responding to messages instead of requiring a client instance?
-                            // await _client.PublishAsync(eventArgs.ApplicationMessage.ResponseTopic, response);
+                            await _client.PublishAsync(eventArgs.ApplicationMessage.ResponseTopic, JsonSerializer.Serialize(response));
                         }
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine($"Error while handling Mqtt topic: {e}");
-                        //TODO: What should the error handling be? this can be bad types, incorrect number of arguments, etc. It just swallows any error and doesn't acknowledge
-                        // await _client.PublishAsync(eventArgs.ApplicationMessage.ResponseTopic, response);
+                        if (!string.IsNullOrEmpty(eventArgs.ApplicationMessage.ResponseTopic))
+                        {
+                            await _client.PublishAsync(eventArgs.ApplicationMessage.ResponseTopic, JsonSerializer.Serialize(e));
+                        }
                     }
                 }
             }

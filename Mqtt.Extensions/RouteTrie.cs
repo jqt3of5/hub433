@@ -45,7 +45,38 @@ namespace mqtt
     public static class TrieExtensions
     {
         private static (X, X[]) Head<X>(this IEnumerable<X> list) => (list!.First(), list!.Skip(1).ToArray());
-        
+
+
+        public static void DeletePathValues<T>(this TrieNode<T> node, string path, char delimitor = '/')
+        {
+            var prefixes = path
+                .Split(delimitor)
+                .ToArray();
+            
+            DeletePathValues(node, prefixes); 
+        }
+
+        private static void DeletePathValues<T>(this TrieNode<T> node, string [] pathParts)
+        {
+            if (pathParts.Length == 0)
+            {
+                node.Values.Clear();
+                return;
+            }
+
+            var (head, tail) = pathParts.Head();
+
+            var childNode = node.ChildNodes.FirstOrDefault(n => n.TopicPart == head);
+            if (childNode != null)
+            {
+                childNode.DeletePathValues(tail);
+                    
+                if (!childNode.Values.Any() && !childNode.ChildNodes.Any())
+                {
+                    node.ChildNodes.Remove(childNode);
+                }  
+            }
+        }
         /// <summary>
         ///  
         /// </summary>
