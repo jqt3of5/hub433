@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using Moq;
 using mqtt.Notification;
@@ -11,6 +12,7 @@ namespace Node.Tests
     [TestFixture]
     public class TestCapabilityDescriber
     {
+        [Capability(nameof(IPropertyMockCapability), "1.0.0")]
         public interface IPropertyMockCapability : ICapability
         {
             [Value]
@@ -18,13 +20,14 @@ namespace Node.Tests
             [Value]
             public int PropertyInt{ get; }
         }
+        [Capability(nameof(IMixedMockCapability), "1.0.0")]
         public interface IMixedMockCapability : ICapability
         {
-            [Action]
+            [CapabilityAction]
             public void ActionNoParams();
-            [Action]
+            [CapabilityAction]
             public void ActionStringParam(string a); 
-            [Action]
+            [CapabilityAction]
             public void ActionMixedParam(string a, int b);
             
             [Value]
@@ -32,61 +35,71 @@ namespace Node.Tests
             [Value]
             public int PropertyInt{ get; }
         }
+        [Capability(nameof(IActionMockCapability), "1.0.0")]
         public interface IActionMockCapability : ICapability
         {
-            [Action]
+            [CapabilityAction]
             public void ActionNoParams();
-            [Action]
+            [CapabilityAction]
             public void ActionStringParam(string a);
-            [Action]
+            [CapabilityAction]
             public void ActionIntParam(int a);
-            [Action]
+            [CapabilityAction]
             public void ActionMixedParam(string a, int b);
-            [Action]
+            [CapabilityAction]
             public string FuncStringReturn();
-            [Action]
+            [CapabilityAction]
             public string FuncMixed(string a, int b);
         }
+        [Capability(nameof(IActionAMockCapability), "1.0.0")]
         public interface IActionAMockCapability : ICapability
         {
-            [Action]
+            [CapabilityAction]
             void Foo();
         }
+        [Capability(nameof(IActionBMockCapability), "1.0.0")]
         public interface IActionBMockCapability : ICapability
         {
-            [Action]
+            [CapabilityAction]
             string Foo();
         }
+        [Capability(nameof(IActionCMockCapability), "1.0.0")]
         public interface IActionCMockCapability : ICapability
         {
-            [Action]
+            [CapabilityAction]
             void Foo(string a);
         } 
+        [Capability(nameof(IActionDMockCapability), "1.0.0")]
         public interface IActionDMockCapability : ICapability
         {
-            [Action]
+            [CapabilityAction]
             string Foo(string a);
         } 
         [Test]
         public void TestEmptyCapabilityDescriber()
         {
             var capability = new Mock<ICapability>();
-            capability.SetupGet(capability => capability.CapabilityId).Returns("MyCapability");
-            capability.SetupGet(capability => capability.CapabilityTypeId).Returns("MyCapabilityType");
-            
             var descriptor = CapabilityDescriber.Describe(capability.Object);
-            
-            Assert.That(descriptor.CapabilityId, Is.EqualTo("MyCapability")); 
-            Assert.That(descriptor.CapabilityTypeId, Is.EqualTo("MyCapabilityType")); 
+
+            Assert.That(descriptor.CapabilityType, Is.Not.Empty);
+            Assert.That(descriptor.CapabilityVersion, Is.EqualTo("0.0.0"));
             Assert.That(descriptor.Actions, Is.Empty);
             Assert.That(descriptor.Properties, Is.Empty);
         }
+        [Test]
+        public void TestCapabilityAttributeValues()
+        {
+            var capability = new Mock<IActionMockCapability>();
+            var descriptor = CapabilityDescriber.Describe(capability.Object);
+            
+            Assert.That(descriptor.CapabilityType, Is.EqualTo(nameof(IActionMockCapability)));
+            Assert.That(descriptor.CapabilityVersion, Is.EqualTo("1.0.0"));
+        } 
         [Test]
         public void TestActionCapabilityDescriber()
         {
             var capability = new Mock<IActionMockCapability>();
             var descriptor = CapabilityDescriber.Describe(capability.Object);
-            
             
             Assert.That(descriptor.Actions, Has.Length.EqualTo(6));
             Assert.That(descriptor.Properties, Is.Empty);

@@ -10,4 +10,8 @@
       <PackageReference Include="Unosquare.Raspberry.IO" Version="0.27.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Node.Abstractions\Node.Abstractions.csproj" />
+    </ItemGroup>
+
 </Project>

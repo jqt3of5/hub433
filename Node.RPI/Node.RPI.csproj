@@ -21,4 +21,8 @@
       <ProjectReference Include="..\Node.Abstractions\Node.Abstractions.csproj" />
       <ProjectReference Include="..\Node.Hardware\Node.Hardware.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Capabilities" />
+    </ItemGroup>
 </Project>

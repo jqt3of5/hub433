@@ -1,27 +1,22 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Intrinsics.Arm;
-using System.Text;
 using System.Threading.Tasks;
-using Unosquare.RaspberryIO.Abstractions;
+using Node.Abstractions;
+using RPINode;
 
-namespace RPINode.Peripherals
+namespace Node.Hardware.Peripherals
 {
-    //TODO: This is an abstraction on a device, not a device itself. Should it be combined with BlindsCapability? 
-    public class BlindsDevice
+    [Capability("Blinds", "1.0.0")]
+    public class BlindsCapability : ICapability
     {
         private readonly Transmitter433 _transmitter433;
-        private readonly RadioSymbol[] _startPattern;
-        private readonly RadioSymbol[] _repeatPattern;
+        private readonly RadioSymbol[] _startPattern = new[] {new RadioSymbol(4000, true), new RadioSymbol(2500, false), new RadioSymbol(1000, true)};
+        private readonly RadioSymbol[] _repeatPattern = new[] {new RadioSymbol(5000, true), new RadioSymbol(2500, false), new RadioSymbol(1000, true)};
         public int BcmPin => _transmitter433.BcmPin;
         
-        public BlindsDevice(Transmitter433 transmitter433)
+        public BlindsCapability(Transmitter433 transmitter433)
         {
             _transmitter433 = transmitter433;
-            _startPattern = new[] {new RadioSymbol(4000, true), new RadioSymbol(2500, false), new RadioSymbol(1000, true)}; 
-            _repeatPattern = new[] {new RadioSymbol(5000, true), new RadioSymbol(2500, false), new RadioSymbol(1000, true)}; 
         }
 
         public enum BlindsCommand
@@ -42,7 +37,8 @@ namespace RPINode.Peripherals
             Channel5,
             Channel6,
         }
-
+        
+        [CapabilityAction]
         public async Task SendCommand(BlindsChannel channel, BlindsCommand blindsCommand)
         {
             const string preamble = "11011101001101101";

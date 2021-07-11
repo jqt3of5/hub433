@@ -24,6 +24,11 @@ namespace mqtt.Notification
         public Task Connect(string host);
         public Task<bool> Subscribe(string route, MqttClientService.RouteHandler func);
         public Task<bool> Subscribe(string route, MethodInfo method, object instance);
+        public Task<bool> Subscribe(string topic); 
+        public Task<bool> Subscribe(IMqttApplicationMessageReceivedHandler messageHandler);
+        public Task<bool> Unsubscribe(string topic);
+        public Task<bool> Unsubscribe(IMqttApplicationMessageReceivedHandler handler);
+        
         public Task Publish(string topic, string body);
         public Task<string> PublishWithResult(string topic, string body, CancellationToken token);
     }
@@ -57,6 +62,8 @@ namespace mqtt.Notification
         
         private readonly IMqttClient _client;
 
+        private List<IMqttApplicationMessageReceivedHandler> _otherHandlers = new();
+        
         public static MqttClientService Create(string deviceId)
         {
             var client = new MqttFactory().CreateMqttClient();
@@ -79,31 +86,6 @@ namespace mqtt.Notification
             await _client.ConnectAsync(options, new CancellationToken());
             _client.ApplicationMessageReceivedHandler = this;
         }
-      
-        private async Task<bool> PublishInternal(string topic, object value)
-        {
-            try
-            {
-                switch (value)
-                {
-                    case string str:
-                        await _client.PublishAsync(topic, str);
-                        break;
-                    default:
-
-                        var serialized =  JsonSerializer.Serialize(value);
-                        await _client.PublishAsync(topic, serialized);
-                        break;
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Failed to publish to topic {topic}. Error: {e}");
-                return false;
-            }
-            return true;
-        }
-
         public async Task<bool> Subscribe(string route, RouteHandler func)
         {
             //Convert a "route" (routes can have named path parameters) into a "topic" (topics follow Mqtt.Extensions path formatting. Mainly wildcards are always "+")
@@ -134,6 +116,18 @@ namespace mqtt.Notification
 
             RouteHandler func = message => InvokeWithMappedParameters(message, method, instance);
             return Subscribe(route, func);
+        }
+
+        public async Task<bool> Subscribe(string topic)
+        {
+            await _client.SubscribeAsync(topic);
+            return true;
+        }
+
+        public Task<bool> Subscribe(IMqttApplicationMessageReceivedHandler messageHandler)
+        {
+            _otherHandlers.Add(messageHandler);
+            return Task.FromResult(true);
         }
 
         public Task Publish(string topic, string body)
@@ -178,7 +172,7 @@ namespace mqtt.Notification
         /// <param name="method"></param>
         /// <param name="instance"></param>
         /// <returns></returns>
-        private object? InvokeWithMappedParameters(MqttClientService.NotificationMessage message, MethodInfo method,
+        private object? InvokeWithMappedParameters(NotificationMessage message, MethodInfo method,
             object instance)
         {
             //TODO: This can be improved in a couple of ways....
@@ -194,7 +188,7 @@ namespace mqtt.Notification
                 return null;
             }
 
-            List<object> arguments = new List<object>();
+            List<object> arguments = new();
             for (int i = 0; i < parameters.Length; ++i)
             {
                 var argument = TypeDescriptor.GetConverter(parameters[i].ParameterType).ConvertFromString(stringArguments[i]);
@@ -214,10 +208,18 @@ namespace mqtt.Notification
             RouteTrie.DeletePathValues(topic);
             var result = await _client.UnsubscribeAsync(topic);
             return result.Items.Any(item => item.ReasonCode != MqttClientUnsubscribeResultCode.Success);
-        } 
+        }
 
+        public Task<bool> Unsubscribe(IMqttApplicationMessageReceivedHandler handler)
+        {
+            return Task.FromResult(_otherHandlers.Remove(handler));
+        }
         public async Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs eventArgs)
         {
+            foreach (var handler in _otherHandlers)
+            {
+                await handler.HandleApplicationMessageReceivedAsync(eventArgs);
+            }
             
             if (RouteTrie.TryGetValue(eventArgs.ApplicationMessage.Topic, out var handlers))
             {
@@ -227,7 +229,6 @@ namespace mqtt.Notification
                     var pathParts = path.Split('/');
                     
                     //Extract the parameters from the topic
-                    
                     var subtopic = eventArgs.ApplicationMessage.Topic.Split('/').ToArray();
                     var handlerParams = new List<string>();
                     for (var i = 0; i < pathParts.Length; ++i)

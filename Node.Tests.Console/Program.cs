@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Node.Hardware.Peripherals;
 using RPINode;
-using RPINode.Peripherals;
 using Unosquare.PiGpio;
 using Unosquare.PiGpio.NativeEnums;
 using Unosquare.PiGpio.NativeMethods;
@@ -21,9 +21,9 @@ namespace Node.Tests.Console
             
             var pin = Pi.Gpio[BcmPin.Gpio17];
             var transmitter = new Transmitter433(pin);
-            var blinds = new BlindsDevice(transmitter);
+            var blinds = new BlindsCapability(transmitter);
 
-            await blinds.SendCommand(BlindsDevice.BlindsChannel.Channel1, BlindsDevice.BlindsCommand.Open);
+            await blinds.SendCommand(BlindsCapability.BlindsChannel.Channel1, BlindsCapability.BlindsCommand.Open);
            
             Setup.GpioTerminate();
         }
