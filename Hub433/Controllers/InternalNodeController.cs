@@ -33,7 +33,7 @@ namespace Hub433.Controllers
         [HttpPost]
         [HttpGet]
         [Route("{nodeGuid}/online")]
-        public IActionResult DeviceOnline(string nodeGuid, [FromBody] DeviceCapabilityDescriptor[]? deviceCapabilities)
+        public IActionResult DeviceOnline(string nodeGuid, [FromBody] CapabilityDescriber.DeviceCapabilityDescriptor[]? deviceCapabilities)
         {
             _repo.DeviceOnline(nodeGuid, deviceCapabilities);
             return Ok();

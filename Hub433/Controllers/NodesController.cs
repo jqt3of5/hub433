@@ -92,7 +92,7 @@ namespace Hub433.Controllers
             try
             {
                 var node = _repo.GetDevice(nodeGuid);
-                var capability = node.DeviceCapabilities.FirstOrDefault(cap => cap.CapabilityId == capabilityId);
+                var capability = node.DeviceCapabilities.FirstOrDefault(cap => cap.CapabilityType == capabilityId);
                 if (capability != null)
                 {
                     var action = capability.Actions.FirstOrDefault(act => act.Name == actionName);
@@ -100,8 +100,8 @@ namespace Hub433.Controllers
                     {
                         var body = System.Text.Json.JsonSerializer.Serialize(parameters);
                         //This will wait for a response until the client disconnects. SignalR might be a better mechanism for this possibly long running response, but this will work for now. 
-                        var result = await _mqtt.PublishWithResult(action.MqttTopic, body, HttpContext.RequestAborted);
-                        return Ok(result); 
+                        // var result = await _mqtt.PublishWithResult(action.MqttTopic, body, HttpContext.RequestAborted);
+                        // return Ok(result); 
                     }
                 }
             }

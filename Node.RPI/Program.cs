@@ -21,8 +21,8 @@ namespace RPINode
                 {
                     //TODO: Configure the client to connect to the aws IoT core service
                     //Device ID should probably come from there
-                    var mqtt = MqttClientService.Create(deviceId: DEVICE_ID);
-                    mqtt.Connect("localhost").Wait();
+                    var mqtt = MqttClientService.Create();
+                    mqtt.Connect("a2z3jvbqhyj6iu-ats.iot.us-west-1.amazonaws.com").Wait();
                     
                     services.AddSingleton(mqtt);
 

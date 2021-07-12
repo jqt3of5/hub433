@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Authentication;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -64,27 +68,51 @@ namespace mqtt.Notification
 
         private List<IMqttApplicationMessageReceivedHandler> _otherHandlers = new();
         
-        public static MqttClientService Create(string deviceId)
+        public static MqttClientService Create()
         {
             var client = new MqttFactory().CreateMqttClient();
-            return new(deviceId, client);
+            return new(client);
         }
-        public MqttClientService(string deviceId, IMqttClient client)
+        public MqttClientService(IMqttClient client)
         {
-            DeviceId = deviceId;
             _client = client;
+            _client.ApplicationMessageReceivedHandler = this;
         }
 
         public async Task Connect(string host)
         {
+            var cert =
+                new X509Certificate2(
+                    @"C:\Users\jqt3o\Downloads\ce7cd39126f2e0150f7653e43a99d0c167822de002861060628c72666b20935b-certificate.pem.crt", "", X509KeyStorageFlags.Exportable);
+             string privateKey = File.ReadAllText(@"C:\Users\jqt3o\Downloads\ce7cd39126f2e0150f7653e43a99d0c167822de002861060628c72666b20935b-private.pem.key");
+             var privateKeyBlocks = privateKey.Split("-", StringSplitOptions.RemoveEmptyEntries);
+             var privateKeyBytes = Convert.FromBase64String(privateKeyBlocks[1].Trim());
+
+             var rsa = RSA.Create();
+             rsa.ImportRSAPrivateKey(privateKeyBytes, out var bytesRead);
+             var sslCert = cert.CopyWithPrivateKey(rsa);
+             
+             // work around for Windows (WinApi) problems with PEMS, still in .NET 5
+             //Found here: https://github.com/dotnet/runtime/issues/23749
+             var certificate =  new X509Certificate2(sslCert.Export(X509ContentType.Pfx)); 
+             
+            var ca = new X509Certificate(@"C:\Users\jqt3o\Downloads\AmazonRootCA1.pem");
             var options = new MqttClientOptionsBuilder()
-                            .WithClientId(DeviceId)
+                            .WithClientId("TestingThing")
+                            .WithTls(new MqttClientOptionsBuilderTlsParameters(){Certificates = new[] {certificate}, 
+                                UseTls = true, 
+                                SslProtocol = SslProtocols.Tls12, 
+                                AllowUntrustedCertificates = true,
+                                IgnoreCertificateChainErrors = true, 
+                                IgnoreCertificateRevocationErrors = true})
+                            .WithCleanSession() 
                             //Must be version 500 so that response topics work
                             // .WithProtocolVersion(MqttProtocolVersion.V500)
-                            .WithTcpServer(host)
+                            .WithTcpServer(host, 8883)
                             .Build();
-            await _client.ConnectAsync(options, new CancellationToken());
-            _client.ApplicationMessageReceivedHandler = this;
+            
+            var result = await _client.ConnectAsync(options, new CancellationToken());
+             
         }
         public async Task<bool> Subscribe(string route, RouteHandler func)
         {
