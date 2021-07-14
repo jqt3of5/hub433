@@ -37,16 +37,20 @@ namespace RPINode
             await _mqttClientService.Publish($"device/{_mqttClientService.DeviceId}/offline", "Cancellation Requested");
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public override async Task StartAsync(CancellationToken cancellationToken)
         {
             await _mqttClientService.Subscribe(this);
             await _mqttClientService.Subscribe($"capability/{_mqttClientService.DeviceId}");
+
+            await base.StartAsync(cancellationToken);
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
+        public override async Task StopAsync(CancellationToken cancellationToken)
         {
             await _mqttClientService.Unsubscribe($"capability/{_mqttClientService.DeviceId}");
-            await _mqttClientService.Unsubscribe(this);
+            await _mqttClientService.RegisterHandler(this);
+
+            await base.StopAsync(cancellationToken);
         }
         
         public async Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs eventArgs)
