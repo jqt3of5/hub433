@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using HardwareAbstractionServiceRPI.Peripherals;
+using Node.Hardware.Peripherals;
 using NUnit.Framework;
 using RPINode;
 using Unosquare.PiGpio;

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unosquare.PiGpio.ManagedModel;
-using Unosquare.PiGpio.NativeEnums;
 using Unosquare.RaspberryIO.Abstractions;
 
-namespace RPINode
+namespace Node.Hardware.Peripherals
 {
     public class Receiver433
     {

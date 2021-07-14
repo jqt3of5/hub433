@@ -75,6 +75,8 @@ namespace RPINode
                     {
                         await _mqttClientService.Publish(eventArgs.ApplicationMessage.ResponseTopic, e.ToString());
                     }
+                    
+                    await _mqttClientService.Publish($"error/{_mqttClientService.DeviceId}", e.ToString());
                 }
             }
         }

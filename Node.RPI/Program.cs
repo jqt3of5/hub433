@@ -22,12 +22,9 @@ namespace RPINode
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices(async (hostContext, services) =>
                 {
-                    var cert = new X509Certificate2(
-                            @"ce7cd39126f2e0150f7653e43a99d0c167822de002861060628c72666b20935b-certificate.pem.crt", "", 
-                            X509KeyStorageFlags.Exportable);
-            
-                    string privateKey = File.ReadAllText(@"ce7cd39126f2e0150f7653e43a99d0c167822de002861060628c72666b20935b-private.pem.key");
-
+                    var cert = new X509Certificate2("2d7dd678d5-certificate.pem.crt", "", X509KeyStorageFlags.Exportable);
+                    
+                    string privateKey = File.ReadAllText(@"2d7dd678d5-private.pem.key");
                     var rsa = RSA.Create();
                     rsa.ImportFromPem(privateKey);
                     

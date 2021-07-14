@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Node.Abstractions;
-using RPINode;
 
 namespace Node.Hardware.Peripherals
 {

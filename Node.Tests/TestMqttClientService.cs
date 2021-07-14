@@ -8,6 +8,7 @@ using mqtt.Notification;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Subscribing;
+using MQTTnet.Packets;
 using Node.Abstractions;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
@@ -31,7 +32,7 @@ namespace Node.Tests
                 }
             }));
             
-            var mqtt = new MqttClientService("qwerty", client.Object);
+            var mqtt = new MqttClientService(client.Object);
             
             mqtt.Subscribe("a/b/c", (MqttClientService.NotificationMessage message) =>
             {
@@ -54,7 +55,7 @@ namespace Node.Tests
                 }
             }));
             
-            var mqtt = new MqttClientService("qwerty", client.Object);
+            var mqtt = new MqttClientService(client.Object);
 
             bool didCall = false;
             mqtt.Subscribe("a/b/c", (MqttClientService.NotificationMessage message) =>
@@ -66,7 +67,8 @@ namespace Node.Tests
 
             var payload =  Encoding.UTF8.GetBytes(System.Text.Json.JsonSerializer.Serialize(new[] {"test"}));
             mqtt.HandleApplicationMessageReceivedAsync(new MqttApplicationMessageReceivedEventArgs("qwerty",
-                new MqttApplicationMessage() {Payload = payload, Topic = "a/b/c"})).Wait();
+                new MqttApplicationMessage() {Payload = payload, Topic = "a/b/c"}, new MqttPublishPacket(), 
+                (args, token) => Task.CompletedTask)).Wait();
            
             Assert.That(didCall);
         }
@@ -83,7 +85,7 @@ namespace Node.Tests
                 }
             }));
             
-            var mqtt = new MqttClientService("qwerty", client.Object);
+            var mqtt = new MqttClientService(client.Object);
 
             bool shouldntCall = false;
             bool didCall = false;
@@ -105,7 +107,8 @@ namespace Node.Tests
 
             var payload =  Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new[] {"test"}));
             mqtt.HandleApplicationMessageReceivedAsync(new MqttApplicationMessageReceivedEventArgs("qwerty",
-                new MqttApplicationMessage() {Payload = payload, Topic = "a/b/c"})).Wait();
+                new MqttApplicationMessage() {Payload = payload, Topic = "a/b/c"}, new MqttPublishPacket(), 
+                (args, token) => Task.CompletedTask)).Wait();
            
             Assert.That(didCall);
             Assert.That(!shouldntCall);
@@ -124,7 +127,7 @@ namespace Node.Tests
                 }
             }));
             
-            var mqtt = new MqttClientService("qwerty", client.Object);
+            var mqtt = new MqttClientService(client.Object);
 
             bool didCall = false;
             mqtt.Subscribe("a/b/c", strings =>
@@ -137,7 +140,8 @@ namespace Node.Tests
 
            var payload =  Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new[] {"test", "test", "test"}));
             mqtt.HandleApplicationMessageReceivedAsync(new MqttApplicationMessageReceivedEventArgs("qwerty",
-                new MqttApplicationMessage() {Payload = payload, Topic = "a/b/c"})).Wait();
+                new MqttApplicationMessage() {Payload = payload, Topic = "a/b/c"}, new MqttPublishPacket(), 
+                (args, token) => Task.CompletedTask)).Wait();
            
             Assert.That(didCall);
         }
@@ -162,7 +166,7 @@ namespace Node.Tests
                 }
             }));
             
-            var mqtt = new MqttClientService("qwerty", client.Object);
+            var mqtt = new MqttClientService(client.Object);
 
             var mock = new Mock<IMockCapability>();
 
@@ -178,7 +182,8 @@ namespace Node.Tests
 
             var payload =  Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new[] {"test", "test", "test"}));
             mqtt.HandleApplicationMessageReceivedAsync(new MqttApplicationMessageReceivedEventArgs("qwerty",
-                new MqttApplicationMessage() {Payload = payload, Topic = "a/b/c"})).Wait();
+                new MqttApplicationMessage() {Payload = payload, Topic = "a/b/c"}, new MqttPublishPacket(), 
+                (args, token) => Task.CompletedTask)).Wait();
             
             mock.Verify(cap => 
                 cap.MethodA(It.Is<string>(s => s == "test"), 
@@ -199,7 +204,7 @@ namespace Node.Tests
                 }
             }));
             
-            var mqtt = new MqttClientService("qwerty", client.Object);
+            var mqtt = new MqttClientService(client.Object);
 
             var mock = new Mock<IMockCapability>();
 
@@ -215,7 +220,8 @@ namespace Node.Tests
 
             var payload =  Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new object[] {"test", "test", "42"}));
             mqtt.HandleApplicationMessageReceivedAsync(new MqttApplicationMessageReceivedEventArgs("qwerty",
-                new MqttApplicationMessage() {Payload = payload, Topic = "a/b/c"})).Wait();
+                new MqttApplicationMessage() {Payload = payload, Topic = "a/b/c"}, new MqttPublishPacket(), 
+                (args, token) => Task.CompletedTask)).Wait();
             
             mock.Verify(cap => 
                 cap.MethodB(It.Is<string>(s => s == "test"), 
@@ -236,7 +242,7 @@ namespace Node.Tests
                 }
             }));
             
-            var mqtt = new MqttClientService("qwerty", client.Object);
+            var mqtt = new MqttClientService(client.Object);
 
             var mock = new Mock<IMockCapability>();
 
@@ -252,7 +258,8 @@ namespace Node.Tests
 
             var payload =  Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new object[] {"test", "test", "42", "testytest"}));
             mqtt.HandleApplicationMessageReceivedAsync(new MqttApplicationMessageReceivedEventArgs("qwerty",
-                new MqttApplicationMessage() {Payload = payload, Topic = "a/b/c"})).Wait();
+                new MqttApplicationMessage() {Payload = payload, Topic = "a/b/c"}, new MqttPublishPacket(), 
+                (args, token) => Task.CompletedTask)).Wait();
             
             mock.Verify(cap => 
                 cap.MethodB(It.Is<string>(s => s == "test"), 

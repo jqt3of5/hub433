@@ -21,4 +21,16 @@
       <ProjectReference Include="..\Node.Abstractions\Node.Abstractions.csproj" />
       <ProjectReference Include="..\Node.Hardware\Node.Hardware.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <None Update="2d7dd678d5-certificate.pem.crt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="2d7dd678d5-private.pem.key">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="2d7dd678d5-public.pem.key">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>

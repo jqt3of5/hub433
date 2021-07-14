@@ -1,12 +1,8 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
-using Swan;
-using Unosquare.PiGpio.ManagedModel;
-using Unosquare.PiGpio.NativeEnums;
 using Unosquare.RaspberryIO.Abstractions;
 
-namespace RPINode
+namespace Node.Hardware.Peripherals
 {
     public record RadioSymbol(int DurationUS, bool Value, int? Samples = null);
     
