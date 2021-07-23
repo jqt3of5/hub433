@@ -2,8 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Node.Abstractions;
+using Node.Hardware.Peripherals;
 
-namespace Node.Hardware.Peripherals
+namespace Node.Hardware.Capability
 {
     [Capability("Blinds", "1.0.0")]
     public class BlindsCapability : ICapability
@@ -38,7 +39,7 @@ namespace Node.Hardware.Peripherals
         }
         
         [CapabilityAction]
-        public async Task SendCommand(BlindsChannel channel, BlindsCommand blindsCommand)
+        public async Task Broadcast(BlindsChannel channel, BlindsCommand blindsCommand)
         {
             const string preamble = "11011101001101101";
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Node.Abstractions;
+using Node.Hardware.Capability;
 using Node.Hardware.Peripherals;
 using Unosquare.RaspberryIO.Abstractions;
 

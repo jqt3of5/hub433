@@ -2,10 +2,10 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using HardwareAbstractionServiceRPI.Peripherals;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using mqtt.Notification;
+using Node.Abstractions;
 using Unosquare.RaspberryIO;
 
 namespace RPINode
