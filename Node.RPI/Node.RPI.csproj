@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
@@ -23,13 +23,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="2d7dd678d5-certificate.pem.crt">
+      <None Update="certs\2d7dd678d5-certificate.pem.crt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="2d7dd678d5-private.pem.key">
+      <None Update="certs\2d7dd678d5-private.pem.key">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="2d7dd678d5-public.pem.key">
+      <None Update="certs\2d7dd678d5-public.pem.key">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

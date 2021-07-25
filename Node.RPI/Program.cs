@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using mqtt.Notification;
@@ -10,6 +12,31 @@ using Unosquare.RaspberryIO;
 
 namespace RPINode
 {
+    public class Startup
+    {
+        // This method gets called by the runtime. Use this method to add services to the container.
+        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddControllers();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseRouting();
+                        
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+        }
+    }
     public class Program
     {
         public static void Main(string[] args)
@@ -20,16 +47,25 @@ namespace RPINode
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>().UseUrls("http://*:8080");
+                })
                 .ConfigureServices(async (hostContext, services) =>
                 {
-                    var cert = new X509Certificate2("2d7dd678d5-certificate.pem.crt", "", X509KeyStorageFlags.Exportable);
+                    var certificate = hostContext.Configuration["certificate"];
+                    var cert = new X509Certificate2(certificate, "", X509KeyStorageFlags.Exportable);
                     
-                    string privateKey = File.ReadAllText(@"2d7dd678d5-private.pem.key");
+                    var privateKey = hostContext.Configuration["privateKey"];
+                    string privateKeyText = File.ReadAllText(privateKey);
                     var rsa = RSA.Create();
-                    rsa.ImportFromPem(privateKey);
+                    rsa.ImportFromPem(privateKeyText);
+                    
+                    var name = hostContext.Configuration["thingName"];
+                    var host = hostContext.Configuration["mqttHost"];
                     
                     var mqtt = MqttClientService.Create();
-                    mqtt.Connect("TestingThing", "a2z3jvbqhyj6iu-ats.iot.us-west-1.amazonaws.com", cert, rsa).Wait();
+                    mqtt.Connect(name, host, cert, rsa).Wait();
                     
                     services.AddSingleton<IMqttClientService>(mqtt);
 

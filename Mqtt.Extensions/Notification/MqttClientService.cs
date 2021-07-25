@@ -26,7 +26,7 @@ namespace mqtt.Notification
 {
     public interface IMqttClientService
     {
-        public string DeviceId { get; }
+        public string ThingName { get; }
 
         public Task Connect(string clientId, string host, X509Certificate2 certificate, RSA privateKey);
         public Task Connect(string clientId, string host, X509Certificate2 pfxCertificate);
@@ -35,7 +35,7 @@ namespace mqtt.Notification
         public Task<bool> Subscribe(string topic); 
         public Task<bool> Subscribe(IMqttApplicationMessageReceivedHandler messageHandler);
         public Task<bool> Unsubscribe(string topic);
-        public Task<bool> RegisterHandler(IMqttApplicationMessageReceivedHandler handler);
+        public Task<bool> RemoveHandler(IMqttApplicationMessageReceivedHandler handler);
         
         public Task Publish(string topic, string body);
         public Task<string> PublishWithResult(string topic, string body, CancellationToken token);
@@ -66,7 +66,7 @@ namespace mqtt.Notification
         
         public readonly TrieNode<(string, RouteHandler)> RouteTrie = new(); 
         
-        public string DeviceId { get; private set; }
+        public string ThingName { get; private set; }
         
         private readonly IMqttClient _client;
 
@@ -116,7 +116,7 @@ namespace mqtt.Notification
                             .WithTcpServer(host, 8883)
                             .Build();
 
-            DeviceId = clientId;
+            ThingName = clientId;
             var result = await _client.ConnectAsync(options, new CancellationToken());
         }
         
@@ -196,7 +196,7 @@ namespace mqtt.Notification
 
         private string GenerateResponseTopic()
         {
-            return $"{DeviceId}/{Guid.NewGuid()}";
+            return $"{ThingName}/{Guid.NewGuid()}";
         }
 
         /// <summary>
@@ -244,7 +244,7 @@ namespace mqtt.Notification
             return result.Items.Any(item => item.ReasonCode != MqttClientUnsubscribeResultCode.Success);
         }
 
-        public Task<bool> RegisterHandler(IMqttApplicationMessageReceivedHandler handler)
+        public Task<bool> RemoveHandler(IMqttApplicationMessageReceivedHandler handler)
         {
             return Task.FromResult(_otherHandlers.Remove(handler));
         }

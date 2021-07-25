@@ -37,7 +37,7 @@ namespace Hub433
             }
 
             app.UseRouting();
-                        
+            app.UseAuthentication();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

@@ -19,9 +19,11 @@ namespace RPINode
         private List<(string Version, string Name, Type Type)> _capabilityTypes = new();
         public CapabilityService(IGpioController pins)
         {
+            //Create Connected Peripheral Instances
             _transmitter433 = new Transmitter433(pins[BcmPin.Gpio17]);
             _receiver433 = new Receiver433(pins[BcmPin.Gpio23]);
 
+            //Register the available capabilities 
             RegisterCapability<BlindsCapability>();
             RegisterCapability<RemoteRelayCapability>();
         }
@@ -46,7 +48,6 @@ namespace RPINode
                 if (capabilityType.Version == request.CapabilityVersion && capabilityType.Name == request.CapabilityType)
                 {
                     //Next find the method to perform the action
-                    //TODO: Search only for methods have have the "CapabilityActionAttribute" assigned to them?
                     var methodInfo = capabilityType.Type.GetMethod(request.CapabilityAction);
                     if (methodInfo != null)
                     {
