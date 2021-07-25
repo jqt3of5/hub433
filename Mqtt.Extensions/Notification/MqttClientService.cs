@@ -19,19 +19,23 @@ using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Client.Subscribing;
 using MQTTnet.Client.Unsubscribing;
+using MQTTnet.Formatter;
+using MQTTnet.Protocol;
 
 namespace mqtt.Notification
 {
     public interface IMqttClientService
     {
-        public string DeviceId { get; }
-        public Task Connect(string host);
+        public string ThingName { get; }
+
+        public Task Connect(string clientId, string host, X509Certificate2 certificate, RSA privateKey);
+        public Task Connect(string clientId, string host, X509Certificate2 pfxCertificate);
         public Task<bool> Subscribe(string route, MqttClientService.RouteHandler func);
         public Task<bool> Subscribe(string route, MethodInfo method, object instance);
         public Task<bool> Subscribe(string topic); 
         public Task<bool> Subscribe(IMqttApplicationMessageReceivedHandler messageHandler);
         public Task<bool> Unsubscribe(string topic);
-        public Task<bool> Unsubscribe(IMqttApplicationMessageReceivedHandler handler);
+        public Task<bool> RemoveHandler(IMqttApplicationMessageReceivedHandler handler);
         
         public Task Publish(string topic, string body);
         public Task<string> PublishWithResult(string topic, string body, CancellationToken token);
@@ -62,7 +66,7 @@ namespace mqtt.Notification
         
         public readonly TrieNode<(string, RouteHandler)> RouteTrie = new(); 
         
-        public string DeviceId { get; }
+        public string ThingName { get; private set; }
         
         private readonly IMqttClient _client;
 
@@ -79,41 +83,43 @@ namespace mqtt.Notification
             _client.ApplicationMessageReceivedHandler = this;
         }
 
-        public async Task Connect(string host)
+        public async Task Connect(string clientId, string host, X509Certificate2 certificate, RSA privateKey)
         {
-            var cert =
-                new X509Certificate2(
-                    @"C:\Users\jqt3o\Downloads\ce7cd39126f2e0150f7653e43a99d0c167822de002861060628c72666b20935b-certificate.pem.crt", "", X509KeyStorageFlags.Exportable);
-             string privateKey = File.ReadAllText(@"C:\Users\jqt3o\Downloads\ce7cd39126f2e0150f7653e43a99d0c167822de002861060628c72666b20935b-private.pem.key");
-             var privateKeyBlocks = privateKey.Split("-", StringSplitOptions.RemoveEmptyEntries);
-             var privateKeyBytes = Convert.FromBase64String(privateKeyBlocks[1].Trim());
+            var certWithPrivateKey = certificate.CopyWithPrivateKey(privateKey);
+            
+            // work around for Windows (WinApi) problems with PEMS, still in .NET 5
+            //Found here: https://github.com/dotnet/runtime/issues/23749
+            var pfx =  new X509Certificate2(certWithPrivateKey.Export(X509ContentType.Pfx));
 
-             var rsa = RSA.Create();
-             rsa.ImportRSAPrivateKey(privateKeyBytes, out var bytesRead);
-             var sslCert = cert.CopyWithPrivateKey(rsa);
-             
-             // work around for Windows (WinApi) problems with PEMS, still in .NET 5
-             //Found here: https://github.com/dotnet/runtime/issues/23749
-             var certificate =  new X509Certificate2(sslCert.Export(X509ContentType.Pfx)); 
-             
-            var ca = new X509Certificate(@"C:\Users\jqt3o\Downloads\AmazonRootCA1.pem");
+            await Connect(clientId, host, pfx);
+        }
+        
+        public async Task Connect(string clientId, string host, X509Certificate2 pfxCertificate)
+        {
+            if (!pfxCertificate.HasPrivateKey)
+            {
+                throw new ArgumentException("Certificate should contain private key");
+            }
+            
             var options = new MqttClientOptionsBuilder()
-                            .WithClientId("TestingThing")
-                            .WithTls(new MqttClientOptionsBuilderTlsParameters(){Certificates = new[] {certificate}, 
+                            .WithClientId(clientId)
+                            .WithTls(new MqttClientOptionsBuilderTlsParameters(){Certificates = new[] {pfxCertificate}, 
                                 UseTls = true, 
                                 SslProtocol = SslProtocols.Tls12, 
                                 AllowUntrustedCertificates = true,
                                 IgnoreCertificateChainErrors = true, 
                                 IgnoreCertificateRevocationErrors = true})
                             .WithCleanSession() 
+                            .WithProtocolVersion(MqttProtocolVersion.V311)
                             //Must be version 500 so that response topics work
                             // .WithProtocolVersion(MqttProtocolVersion.V500)
                             .WithTcpServer(host, 8883)
                             .Build();
-            
+
+            ThingName = clientId;
             var result = await _client.ConnectAsync(options, new CancellationToken());
-             
         }
+        
         public async Task<bool> Subscribe(string route, RouteHandler func)
         {
             //Convert a "route" (routes can have named path parameters) into a "topic" (topics follow Mqtt.Extensions path formatting. Mainly wildcards are always "+")
@@ -190,7 +196,7 @@ namespace mqtt.Notification
 
         private string GenerateResponseTopic()
         {
-            return $"{DeviceId}/{Guid.NewGuid()}";
+            return $"{ThingName}/{Guid.NewGuid()}";
         }
 
         /// <summary>
@@ -238,7 +244,7 @@ namespace mqtt.Notification
             return result.Items.Any(item => item.ReasonCode != MqttClientUnsubscribeResultCode.Success);
         }
 
-        public Task<bool> Unsubscribe(IMqttApplicationMessageReceivedHandler handler)
+        public Task<bool> RemoveHandler(IMqttApplicationMessageReceivedHandler handler)
         {
             return Task.FromResult(_otherHandlers.Remove(handler));
         }

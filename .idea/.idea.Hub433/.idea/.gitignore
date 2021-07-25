@@ -1,0 +1,13 @@
+﻿# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/modules.xml
+/contentModel.xml
+/projectSettingsUpdater.xml
+/.idea.Hub433.iml
+# Datasource local storage ignored files
+/../../../../../../../../:\Users\jqt3o\RiderProjects\hub433\.idea\.idea.Hub433\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/

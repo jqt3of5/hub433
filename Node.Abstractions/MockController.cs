@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Swan.DependencyInjection;
 using Unosquare.RaspberryIO.Abstractions;
 
-namespace HardwareAbstractionServiceRPI.Peripherals
+namespace Node.Abstractions
 {
 
     public class BootstrapMock : IBootstrap

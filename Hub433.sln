@@ -1,12 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hub433", "Hub433\Hub433.csproj", "{9D06F20E-0BDB-4291-9F1F-793863ECF1A1}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Node.RPI", "Node.RPI\Node.RPI.csproj", "{08A23657-BEDF-44B1-8237-13AFE1BD5D3F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Node.Abstractions", "Node.Abstractions\Node.Abstractions.csproj", "{81AF9308-08D9-4BEB-83B4-24A03E6A9C6B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hub433Test", "Hub433Test\Hub433Test.csproj", "{A581B7B7-EA02-4B72-92E7-0AD9E55BE4F0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Node.Hardware", "Node.Hardware\Node.Hardware.csproj", "{F4614D6A-B45E-4851-AE90-732A246E8BEB}"
 EndProject
@@ -16,16 +12,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Node.Tests.Console", "Node.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mqtt.Extensions", "Mqtt.Extensions\Mqtt.Extensions.csproj", "{E6BBD3B6-3760-473C-B3DA-88BFA66B8E14}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleClient", "ConsoleClient\ConsoleClient.csproj", "{15BE3E4C-1975-4719-8517-FADC83ADD9AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9D06F20E-0BDB-4291-9F1F-793863ECF1A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9D06F20E-0BDB-4291-9F1F-793863ECF1A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9D06F20E-0BDB-4291-9F1F-793863ECF1A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9D06F20E-0BDB-4291-9F1F-793863ECF1A1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{08A23657-BEDF-44B1-8237-13AFE1BD5D3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{08A23657-BEDF-44B1-8237-13AFE1BD5D3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08A23657-BEDF-44B1-8237-13AFE1BD5D3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -34,10 +28,6 @@ Global
 		{81AF9308-08D9-4BEB-83B4-24A03E6A9C6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81AF9308-08D9-4BEB-83B4-24A03E6A9C6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81AF9308-08D9-4BEB-83B4-24A03E6A9C6B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A581B7B7-EA02-4B72-92E7-0AD9E55BE4F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A581B7B7-EA02-4B72-92E7-0AD9E55BE4F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A581B7B7-EA02-4B72-92E7-0AD9E55BE4F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A581B7B7-EA02-4B72-92E7-0AD9E55BE4F0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F4614D6A-B45E-4851-AE90-732A246E8BEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F4614D6A-B45E-4851-AE90-732A246E8BEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4614D6A-B45E-4851-AE90-732A246E8BEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -54,5 +44,9 @@ Global
 		{E6BBD3B6-3760-473C-B3DA-88BFA66B8E14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6BBD3B6-3760-473C-B3DA-88BFA66B8E14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6BBD3B6-3760-473C-B3DA-88BFA66B8E14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15BE3E4C-1975-4719-8517-FADC83ADD9AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15BE3E4C-1975-4719-8517-FADC83ADD9AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15BE3E4C-1975-4719-8517-FADC83ADD9AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15BE3E4C-1975-4719-8517-FADC83ADD9AD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
