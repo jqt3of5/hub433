@@ -68,7 +68,7 @@ namespace Hub433Backend
 
             var rand = new Random();
             return
-                $"{words[rand.Next(0, words.Length)]}.{words[rand.Next(0, words.Length)]}.{words[rand.Next(0, words.Length)]}";
+                $"{words[rand.Next(0, words.Length)]}-{words[rand.Next(0, words.Length)]}-{words[rand.Next(0, words.Length)]}";
         }
     }
 }
