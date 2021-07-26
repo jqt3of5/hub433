@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Amazon;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 using Amazon.IoT;
 using Amazon.IoT.Model;
 using Amazon.Lambda.APIGatewayEvents;
@@ -25,8 +27,11 @@ namespace Hub433Backend
             var client = new AmazonIoTClient(RegionEndpoint.USWest1);
            
             //Create Certificate
-            var certificateResponse = await client.CreateKeysAndCertificateAsync();
-            
+            var certificateResponse = await client.CreateKeysAndCertificateAsync(new CreateKeysAndCertificateRequest()
+            {
+                SetAsActive = true
+            });
+
             //Attach Policy to Certificate
             var attachPolicyResponse = await client.AttachPolicyAsync(new AttachPolicyRequest()
             {
@@ -47,6 +52,14 @@ namespace Hub433Backend
                 Principal = certificateResponse.CertificateArn,
                 ThingName = thingName
             });
+
+            var email = apiProxyEvent.RequestContext.Authorizer.Claims["email"];
+            var dynamoDbClient = new AmazonDynamoDBClient(RegionEndpoint.USWest1);
+            await dynamoDbClient.PutItemAsync(new PutItemRequest(Hub433ThingsTableSchema.TableName, 
+                new(){
+                    {Hub433ThingsTableSchema.PrimaryKey, new AttributeValue(thingName)}, 
+                    {Hub433ThingsTableSchema.OwnerEmail, new AttributeValue(email)}
+                }));
             
             return new APIGatewayProxyResponse
             {

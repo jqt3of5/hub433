@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using mqtt.Notification;
+using Newtonsoft.Json;
 
 namespace RPINode
 {
@@ -17,11 +19,10 @@ namespace RPINode
         }
         
         [HttpPost]
-        [Route("configure")]
-        public IActionResult Configure([FromBody]ThingCreatedResponse config)
+        [Route("claim")]
+        public async Task<IActionResult> Claim([FromBody]ClaimCodeRequest config)
         {
-            //TODO: Save certificate files
-            //TODO: Store ThingName
+            await _service.Publish($"thing/{_service.ThingName}/claim", JsonConvert.SerializeObject(config));
             return Ok();
         } 
     }

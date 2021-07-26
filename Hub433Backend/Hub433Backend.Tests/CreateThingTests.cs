@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
@@ -20,10 +21,14 @@ namespace Hub433Backend.Tests
             var contextMock = new Mock<ILambdaContext>();
             var response = await new CreateThing().FunctionHandler(new APIGatewayProxyRequest()
             {
-
+                RequestContext = new APIGatewayProxyRequest.ProxyRequestContext()
+                {
+                    Authorizer = new APIGatewayCustomAuthorizerContext()
+                    {
+                        Claims = new (){{"email", "jqt3of5@gmail.com"}}
+                    }
+                }
             }, contextMock.Object);
-            
-            
         }
     }
 }

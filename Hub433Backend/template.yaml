@@ -20,11 +20,26 @@ Resources:
             UserPoolArn: arn:aws:cognito-idp:us-west-1:254414866354:userpool/us-west-1_g4JeVFuCV
             Identity:
               Header: Authorization 
+  GenerateClaimCodeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/Hub433Backend/
+      Handler: Hub433Backend::Hub433Backend.GenerateClaimCode::FunctionHandler
+      Runtime: dotnetcore3.1
+      Events:
+        Hub433Api:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref Hub433Api
+            Auth:
+              DefaultAuthorizer: Hub433UsersAuthorizer
+            Path: /thing/claimcode
+            Method: get
   CreateThingFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./src/Hub433Backend/
-      Handler: Hub433Backend::Hub433Backend.CreateThing::FunctionHandler
+      Handler: Hub433Backend::Hub433Backend.GenerateClaimCode::FunctionHandler
       Runtime: dotnetcore3.1
       Events:
         Hub433Api:
@@ -35,6 +50,17 @@ Resources:
               DefaultAuthorizer: Hub433UsersAuthorizer
             Path: /thing/create
             Method: get
+  ClaimDeviceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/Hub433Backend/
+      Handler: Hub433Backend::Hub433Backend.ClaimDevice::FunctionHandler
+      Runtime: dotnetcore3.1
+      Events:
+        Hub433Api:
+          Type: IoTRule # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Sql: "SELECT *, topic(2) as ThingName FROM 'thing/+/claim'"
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
@@ -42,9 +68,9 @@ Outputs:
   Hub433Api:
     Description: "API Gateway endpoint URL for Prod stage for Hello World function"
     Value: !Sub "https://${Hub433Api}.execute-api.${AWS::Region}.amazonaws.com/Test/hello/"
-  CreateThingFunction:
+  GenerateClaimCodeFunction:
     Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt CreateThingFunction.Arn
-  CreateThingFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt CreateThingFunctionIamRole.Arn
+    Value: !GetAtt GenerateClaimCodeFunction.Arn
+  ClaimDeviceFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt GenerateClaimCodeFunction.Arn

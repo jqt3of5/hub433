@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using Amazon;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 using Amazon.IoT.Model;
 using Newtonsoft.Json;
 
@@ -19,14 +22,25 @@ namespace Hub433Backend
 {
     public class ClaimDevice
     {
-        private static readonly HttpClient client = new HttpClient();
-        
-        public async Task FunctionHandler(string claimCode, string thingName, ILambdaContext context)
+        public class ClaimCodeRequest
         {
-            //TODO: Secret in code! Bad!!
-            if (GenerateClaimCode.ValidateClaimCode(claimCode, ";lk@#$asdf@daf#", out var email))
+            public string ClaimCode { get; set; }
+            public string ThingName { get; set; }
+        }
+        public async Task FunctionHandler(ClaimCodeRequest request, ILambdaContext context)
+        {
+            if (GenerateClaimCode.ValidateClaimCode(request.ClaimCode, GenerateClaimCode.SignatureKey, out var email))
             {
-                //TODO: Assign the thing to the user specified in the claim code                
+                var client = new AmazonDynamoDBClient(RegionEndpoint.USWest1);
+                await client.UpdateItemAsync(Hub433ThingsTableSchema.TableName, 
+                    new()
+                    {
+                        {Hub433ThingsTableSchema.PrimaryKey, new AttributeValue(request.ThingName)}
+                    }, 
+                    new ()
+                    {
+                        {Hub433ThingsTableSchema.OwnerEmail, new AttributeValueUpdate(new AttributeValue(email), AttributeAction.PUT)}
+                    });
             }
         }
     }

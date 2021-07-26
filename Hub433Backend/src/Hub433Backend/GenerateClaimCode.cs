@@ -23,6 +23,8 @@ namespace Hub433Backend
             public string guid { get; set; } 
         }
 
+        //TODO: Secret in code! Bad!!
+        public static string SignatureKey = ";lk@#$asdf@daf#";
         public static string BuildClaimCode(ClaimCodeRequest request, string sharedKey)
         {
             var signature = SignRequestCode(request, sharedKey); 
@@ -39,8 +41,7 @@ namespace Hub433Backend
         
         public static string SignRequestCode(ClaimCodeRequest request, string sharedKey)
         {
-            //TODO: This uses a shared key to perform the signature. Not the best way to do this
-            var hmac = HMAC.Create();
+            var hmac = HMAC.Create("hmacsha256");
             hmac.Initialize();
             hmac.Key = Encoding.UTF8.GetBytes(sharedKey);
            
@@ -78,26 +79,33 @@ namespace Hub433Backend
         
         public async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest apigProxyEvent, ILambdaContext context)
         {
-            var email = apigProxyEvent.RequestContext.Authorizer.Claims["email"];
+            if (apigProxyEvent.RequestContext.Authorizer.TryGetValue("claims", out var obj) &&
+                obj is Dictionary<string, object> claims && claims.TryGetValue("email", out var email))
+            {
+                var claimCode = BuildClaimCode(new ClaimCodeRequest()
+                {
+                    email = email.ToString(),
+                    guid = Guid.NewGuid().ToString()
+                }, SignatureKey);
 
-            //TODO: Secret in code! Bad!!
-            var claimCode = BuildClaimCode(new ClaimCodeRequest()
-            {
-                email = email,
-                guid = Guid.NewGuid().ToString()
-            }, ";lk@#$asdf@daf#");
-            
-            var body = new Dictionary<string, string>
-            {
-                { "claimcode", claimCode},
-            };
+                var body = new Dictionary<string, string>
+                {
+                    {"claimcode", claimCode},
+                };
+
+                return new APIGatewayProxyResponse
+                {
+                    Body = JsonConvert.SerializeObject(body),
+                    StatusCode = 200,
+                    Headers = new Dictionary<string, string> {{"Content-Type", "application/json"}}
+                };
+            }
             
             return new APIGatewayProxyResponse
             {
-                Body = JsonConvert.SerializeObject(apigProxyEvent.RequestContext.Authorizer.Claims),
-                StatusCode = 200,
-                Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
-            };
+                Body = JsonConvert.SerializeObject(apigProxyEvent.RequestContext.Authorizer),
+                StatusCode = 401,
+            }; 
         }
     }
 }
