@@ -14,6 +14,7 @@ using Amazon.Extensions.CognitoAuthentication;
 using Amazon.IoT;
 using Amazon.IoT.Model;
 using Amazon.Runtime;
+using Microsoft.VisualBasic;
 using Node.Abstractions;
 using RestSharp;
 
@@ -23,54 +24,200 @@ namespace ConsoleClient
     {
         static async Task<int> Main(string[] args)
         {
-
-            var rootCommand = new RootCommand()
+            const string defaultBaseUrl = "https://z7r1yyeoef.execute-api.us-west-1.amazonaws.com";
+            var createCommand = new Command("create", "Create a new thing associated to the logged-in user")
             {
-                new Option("--command", 
-                    "The specific command to execute. Options are: create, generateclaimcode"),
                 new Option("--user",
                     "The specific user to validate as"),
                 new Option("--base-url", 
-                    getDefaultValue: () => "https://z7r1yyeoef.execute-api.us-west-1.amazonaws.com",
+                    getDefaultValue: () => defaultBaseUrl,
                     description: "The base URL of our api"),
-                new Option("--node-api",
-                    getDefaultValue: () => "http://localhost:8080",
-                    description: "Node api URL")
             };
+            var claimCommand = new Command("claim", "Generates a claim code for an unclaimed thing, and sends it to the thing server for validation")
+            {
+                new Option("--user",
+                    getDefaultValue: () => "", 
+                    description: "The specific user to validate as"),
+                new Option("--base-url", 
+                    getDefaultValue: () => defaultBaseUrl, 
+                    description: "The base URL of our api"),
+                new Option("--thing-host",
+                    getDefaultValue: () => "",
+                    description: "Node api URL"),
+            }; 
+            var invokeCapability = new Command("capability", "Invoke a capability for a thing")
+            {
+                new Argument("thingName"),
+                new Argument("capability"),
+                new Option("--user",
+                    getDefaultValue: () => "", 
+                    description: "The specific user to validate as"),
+                new Option("--capability-type",
+                    getDefaultValue: () => "", 
+                    description: "The capability type"),
+                new Option("--capability-action",
+                    getDefaultValue: () => "", 
+                    description: "The capability action belonging to the type"),
+                new Option("--capability-version",
+                    getDefaultValue: () => "latest", 
+                    description: "The capability version to invoke"), 
+                new Option("--base-url", 
+                    getDefaultValue: () => defaultBaseUrl, 
+                    description: "The base URL of our api"),
+            }; 
+            var getThingShadow = new Command("shadow", "Generates a claim code for an unclaimed thing, and sends it to the thing server for validation")
+            {
+                new Argument("thingName"),
+                new Option("--user",
+                    getDefaultValue: () => "", 
+                    description: "The specific user to validate as"),
+                new Option("--base-url", 
+                    getDefaultValue: () => defaultBaseUrl, 
+                    description: "The base URL of our api"),
+            }; 
+            var rootCommand = new RootCommand()
+            {
+                createCommand, 
+                claimCommand,
+                invokeCapability,
+                getThingShadow
+            };
+            
+            invokeCapability.Handler = CommandHandler.Create<string,string, string, string, string, string>(async (thingName, capabilityType, capabilityAction, capabilityVersion, user, baseUrl) =>
+            {
+                if (string.IsNullOrEmpty(capabilityAction) || string.IsNullOrEmpty(capabilityType))
+                {
+                    Console.WriteLine("Must supply a capability type and action");
+                    return;
+                }
+                
+                if (string.IsNullOrEmpty(user))
+                {
+                    Console.Write("Username: ");
+                    user = Console.ReadLine();
+                }
+                
+                var result = await Login(user);
+                if (result == null || string.IsNullOrEmpty(result.AccessToken))
+                {
+                    return;
+                }
+                
+                var awsClient = new RestClient(baseUrl);
+                awsClient.AddDefaultHeader("Authorization", result.IdToken); 
+                
+                var request = new RestRequest($"Stage/thing/capability/{thingName}");
+                request.AddJsonBody(new DeviceCapabilityRequest()
+                {
+                   CapabilityAction = capabilityAction,
+                   CapabilityType = capabilityType,
+                   CapabilityVersion = capabilityVersion,
+                   arguments = 
+                });
+                var response = awsClient.Get<ThingCreatedResponse>(request);
+                
+                Console.WriteLine(response.Content); 
+            });
+            
+            getThingShadow.Handler = CommandHandler.Create<string, string, string>(async (thingName, user, baseUrl) =>
+            {
+                if (string.IsNullOrEmpty(user))
+                {
+                    Console.Write("Username: ");
+                    user = Console.ReadLine();
+                }
+                
+                var result = await Login(user);
+                if (result == null || string.IsNullOrEmpty(result.AccessToken))
+                {
+                    return;
+                }
+                
+                var awsClient = new RestClient(baseUrl);
+                awsClient.AddDefaultHeader("Authorization", result.IdToken); 
+                
+                var request = new RestRequest($"Stage/thing/shadow/{thingName}");
+                //request.AddJsonBody()
+                var response = awsClient.Get<ThingCreatedResponse>(request);
+                
+                Console.WriteLine(response.Content); 
+            });
 
-            rootCommand.Handler = CommandHandler.Create<string, string, string, string>((async (command, user, baseUrl, nodeApi) =>
-                    {
-                        var result = await Login(user);
-                        var awsClient = new RestClient(baseUrl);
-                        awsClient.AddDefaultHeader("Authorization", result.IdToken);
-                        switch (command)
-                        {
-                            case "create":
-                                var request = new RestRequest("Stage/thing/create");
-                                var response = awsClient.Get<ThingCreatedResponse>(request);
-                                Console.WriteLine(response.Content); 
-                                break;
-                            case "generateclaimcode":
-                                request = new RestRequest("Stage/thing/claimcode");
-                                var claimCodeResponse = awsClient.Get<ClaimCodeRequest>(request);
-                    
-                                var nodeClient = new RestClient(nodeApi);
-                                var claimRequest = new RestRequest("/claim", DataFormat.Json);
-                    
-                                claimRequest.AddJsonBody(claimCodeResponse.Data);
-                                var claimDeviceResponse = nodeClient.Post(claimRequest);
-                                Console.WriteLine(claimDeviceResponse);
-                    
-                                break;
-                        } 
-                    }
-                ));
+            createCommand.Handler = CommandHandler.Create<string, string>(async (user, baseUrl) =>
+            {
+                if (string.IsNullOrEmpty(user))
+                {
+                    Console.Write("Username: ");
+                    user = Console.ReadLine();
+                }
+                
+                var result = await Login(user);
+                if (result == null || string.IsNullOrEmpty(result.AccessToken))
+                {
+                    return;
+                }
+                
+                var awsClient = new RestClient(baseUrl);
+                awsClient.AddDefaultHeader("Authorization", result.IdToken); 
+                
+                var request = new RestRequest("Stage/thing/create");
+                var response = awsClient.Get<ThingCreatedResponse>(request);
+                
+                Console.WriteLine(response.Content); 
+            });
+            
+            claimCommand.Handler = CommandHandler.Create<string, string, string>(async (user, baseUrl, thingHost) =>
+            {
+                if (string.IsNullOrEmpty(user))
+                {
+                    Console.Write("Username: ");
+                    user = Console.ReadLine();
+                }
+                
+                var result = await Login(user);
+                if (result == null || string.IsNullOrEmpty(result.AccessToken))
+                {
+                    return;
+                }
+                
+                var awsClient = new RestClient(baseUrl);
+                awsClient.AddDefaultHeader("Authorization", result.IdToken); 
+                
+                var request = new RestRequest("Stage/thing/claimcode");
+                var claimCodeResponse = awsClient.Get<ClaimCodeRequest>(request);
 
+                if (!claimCodeResponse.IsSuccessful)
+                {
+                    Console.WriteLine($"Failed to generate claim code. Error: HTTP {claimCodeResponse.StatusCode} {claimCodeResponse.Content}");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(thingHost))
+                {
+                    Console.WriteLine(claimCodeResponse.Content);
+                    return;
+                }
+                
+                var nodeClient = new RestClient(thingHost);
+                var claimRequest = new RestRequest("/claim", DataFormat.Json);
+                claimRequest.AddJsonBody(claimCodeResponse.Data);
+                
+                var claimDeviceResponse = nodeClient.Post(claimRequest);
+                
+                Console.WriteLine(claimDeviceResponse);
+
+            });
+   
             return await rootCommand.InvokeAsync(args);
         }
 
         static async Task<AuthenticationResultType> Login(string username)
         {
+            if (string.IsNullOrEmpty(username))
+            {
+                return null;
+            }
+            
             var client = new AmazonCognitoIdentityProviderClient(new AnonymousAWSCredentials(), RegionEndpoint.USWest1);
             var userPool = new CognitoUserPool("us-west-1_g4JeVFuCV", "rop16j0et2ps80mshb3gutfsq", client);
             var user = new CognitoUser(username, "rop16j0et2ps80mshb3gutfsq", userPool, client);
@@ -113,7 +260,6 @@ namespace ConsoleClient
                 Console.WriteLine(e);
                 return null;
             }
-
 
             string GetPassword()
             {

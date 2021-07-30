@@ -32,7 +32,8 @@ namespace Hub433Backend
                 Target = certificateResponse.CertificateArn
             });
             
-            var thingName = ThingNameGenerator();
+            var username = apiProxyEvent.RequestContext.Authorizer.Claims["cognito:username"];
+            var thingName = ThingNameGenerator(username);
             //Create Thing
             var createThingResponse = await client.CreateThingAsync(new CreateThingRequest()
             {
@@ -68,13 +69,15 @@ namespace Hub433Backend
             };
         }
 
-        private string ThingNameGenerator()
+        private string ThingNameGenerator(string username)
         {
-            string[] words = {"razzle", "dazzle", "dog", "cat", "round", "square"};
+            string[] adjectives= {"razzle", "dazzle", "round", "blue", "super", "awesome", "fantastic", "fictitious", "impressive", "profound", "frazzled"};
+            string[] nouns = {"dog", "cat", "rectangle", "triangle", "book", "bridge", "thing", "plane", "car", "trolley"};
 
             var rand = new Random();
             return
-                $"{words[rand.Next(0, words.Length)]}-{words[rand.Next(0, words.Length)]}-{words[rand.Next(0, words.Length)]}";
+                $"{username}_{adjectives[rand.Next(0, adjectives.Length-1)]}-{adjectives[rand.Next(0, adjectives.Length-1)]}-{nouns[rand.Next(0, nouns.Length-1)]}";
         }
+        
     }
 }
