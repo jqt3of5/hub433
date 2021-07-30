@@ -1,0 +1,4 @@
+﻿POST localhost:8080/claim
+Content-Type: application/json
+
+{"claimcode":"eyJlbWFpbCI6ImpxdDNvZjVAZ21haWwuY29tIiwiZ3VpZCI6ImZmYmFlNWM4LTExZGUtNGU1Mi05Y2QzLWY5ZDBjZWZjMWJlNSIsInNpZ25hdHVyZSI6ImF0d05wR1JuRDJpckZBWlhDRXdHZDBtWExDeFJTYzlXYzVyVVpMWU43cjQ9In0="}

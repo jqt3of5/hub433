@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 
 using Amazon.Lambda.Core;
 using Amazon.Lambda.APIGatewayEvents;
+using Newtonsoft.Json.Linq;
 
 namespace Hub433Backend 
 {
@@ -76,15 +77,15 @@ namespace Hub433Backend
 
             return signature == claimCodeObject["signature"];
         }
-        
-        public async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest apigProxyEvent, ILambdaContext context)
+
+        public async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest apigProxyEvent,
+            ILambdaContext context)
         {
-            if (apigProxyEvent.RequestContext.Authorizer.TryGetValue("claims", out var obj) &&
-                obj is Dictionary<string, object> claims && claims.TryGetValue("email", out var email))
+            if (apigProxyEvent.RequestContext.Authorizer.TryGetValue("claims", out var o) && o is JObject claims)
             {
                 var claimCode = BuildClaimCode(new ClaimCodeRequest()
                 {
-                    email = email.ToString(),
+                    email = claims["email"].ToString(),
                     guid = Guid.NewGuid().ToString()
                 }, SignatureKey);
 
@@ -101,11 +102,11 @@ namespace Hub433Backend
                 };
             }
             
-            return new APIGatewayProxyResponse
+            return new APIGatewayProxyResponse()
             {
-                Body = JsonConvert.SerializeObject(apigProxyEvent.RequestContext.Authorizer),
-                StatusCode = 401,
-            }; 
+                Body = "No Claims, not Authorized",
+                StatusCode = 401
+            };
         }
     }
 }

@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hub433Backend", "src\Hub433
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hub433Backend.Tests", "Hub433Backend.Tests\Hub433Backend.Tests.csproj", "{4C79B238-4306-4F54-83C9-E9A46588A838}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Node.Abstractions", "..\Node.Abstractions\Node.Abstractions.csproj", "{B3EDC739-AEC2-483E-B812-98E175E717FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,5 +28,9 @@ Global
 		{4C79B238-4306-4F54-83C9-E9A46588A838}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C79B238-4306-4F54-83C9-E9A46588A838}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C79B238-4306-4F54-83C9-E9A46588A838}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3EDC739-AEC2-483E-B812-98E175E717FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3EDC739-AEC2-483E-B812-98E175E717FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3EDC739-AEC2-483E-B812-98E175E717FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3EDC739-AEC2-483E-B812-98E175E717FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -10,6 +10,11 @@
       <PackageReference Include="AWSSDK.IoT" Version="3.7.2.14" />
       <PackageReference Include="MQTTnet" Version="3.0.16" />
       <PackageReference Include="RestSharp" Version="106.12.0" />
+      <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Node.Abstractions\Node.Abstractions.csproj" />
     </ItemGroup>
 
 </Project>

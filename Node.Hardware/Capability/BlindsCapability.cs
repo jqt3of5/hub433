@@ -37,6 +37,12 @@ namespace Node.Hardware.Capability
             Channel5,
             Channel6,
         }
+
+        [CapabilityAction]
+        public async Task Pair(BlindsChannel channel)
+        {
+            
+        }
         
         [CapabilityAction]
         public async Task Broadcast(BlindsChannel channel, BlindsCommand blindsCommand)

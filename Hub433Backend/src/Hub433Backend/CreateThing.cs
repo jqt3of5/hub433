@@ -9,19 +9,12 @@ using Amazon.IoT.Model;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Newtonsoft.Json;
+using Node.Abstractions;
 
 namespace Hub433Backend
 {
     public class CreateThing
     {
-        public class ThingCreatedResponse
-        {
-            public string ThingName { get; set; }
-            public string CertificatePem { get; set; }
-            public string PublicKey { get; set; }
-            public string PrivateKey { get; set; }
-        }
-        
         public async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest apiProxyEvent, ILambdaContext context)
         {
             var client = new AmazonIoTClient(RegionEndpoint.USWest1);

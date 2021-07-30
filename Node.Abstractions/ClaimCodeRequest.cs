@@ -1,4 +1,4 @@
-﻿namespace RPINode
+﻿namespace Node.Abstractions
 {
     public class ClaimCodeRequest
     {

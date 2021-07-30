@@ -16,7 +16,18 @@ namespace Node.Hardware.Capability
         }
 
         [CapabilityAction]
-        public Task Transmit(string address, float dutyCycle)
+        public async Task PairAddress(string address)
+        {
+            
+        } 
+        [CapabilityAction]
+        public async Task PairChannel(int channel)
+        {
+            //TODO: Define the remote relay protocol
+        } 
+        
+        [CapabilityAction]
+        public Task Transmit(string address, int port, float dutyCycle)
         {
             byte[] addr = Convert.FromBase64String(address);
             //TODO: Define the remote relay protocol
@@ -25,7 +36,7 @@ namespace Node.Hardware.Capability
         }
         
         [CapabilityAction]
-        public Task Broadcast(int channel, float dutyCycle)
+        public Task Broadcast(int channel, int port, float dutyCycle)
         {
             //TODO: Define the remote relay protocol
             Console.WriteLine($"{channel} {dutyCycle}"); 

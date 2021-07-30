@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using mqtt.Notification;
 using Newtonsoft.Json;
+using Node.Abstractions;
 
 namespace RPINode
 {

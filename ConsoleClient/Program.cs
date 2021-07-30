@@ -1,6 +1,9 @@
 ﻿using System;
+using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.Net.Http;
 using System.Security;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Amazon;
@@ -11,30 +14,59 @@ using Amazon.Extensions.CognitoAuthentication;
 using Amazon.IoT;
 using Amazon.IoT.Model;
 using Amazon.Runtime;
+using Node.Abstractions;
 using RestSharp;
 
 namespace ConsoleClient
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
-            var result = await Login(args[1]);
-            var client = new RestClient("https://z7r1yyeoef.execute-api.us-west-1.amazonaws.com");
-            client.AddDefaultHeader("Authorization", result.IdToken);
-            switch (args[0])
+
+            var rootCommand = new RootCommand()
             {
-                case "create":
-                    var request = new RestRequest("Stage/thing/create");
-                    var response = client.Get(request);
-                    Console.WriteLine(response.Content); 
-                    break;
-                case "generateclaimcode":
-                    request = new RestRequest("Stage/thing/claimcode");
-                    response = client.Get(request);
-                    Console.WriteLine(response.Content);
-                    break;
-            }
+                new Option("--command", 
+                    "The specific command to execute. Options are: create, generateclaimcode"),
+                new Option("--user",
+                    "The specific user to validate as"),
+                new Option("--base-url", 
+                    getDefaultValue: () => "https://z7r1yyeoef.execute-api.us-west-1.amazonaws.com",
+                    description: "The base URL of our api"),
+                new Option("--node-api",
+                    getDefaultValue: () => "http://localhost:8080",
+                    description: "Node api URL")
+            };
+
+            rootCommand.Handler = CommandHandler.Create<string, string, string, string>((async (command, user, baseUrl, nodeApi) =>
+                    {
+                        var result = await Login(user);
+                        var awsClient = new RestClient(baseUrl);
+                        awsClient.AddDefaultHeader("Authorization", result.IdToken);
+                        switch (command)
+                        {
+                            case "create":
+                                var request = new RestRequest("Stage/thing/create");
+                                var response = awsClient.Get<ThingCreatedResponse>(request);
+                                Console.WriteLine(response.Content); 
+                                break;
+                            case "generateclaimcode":
+                                request = new RestRequest("Stage/thing/claimcode");
+                                var claimCodeResponse = awsClient.Get<ClaimCodeRequest>(request);
+                    
+                                var nodeClient = new RestClient(nodeApi);
+                                var claimRequest = new RestRequest("/claim", DataFormat.Json);
+                    
+                                claimRequest.AddJsonBody(claimCodeResponse.Data);
+                                var claimDeviceResponse = nodeClient.Post(claimRequest);
+                                Console.WriteLine(claimDeviceResponse);
+                    
+                                break;
+                        } 
+                    }
+                ));
+
+            return await rootCommand.InvokeAsync(args);
         }
 
         static async Task<AuthenticationResultType> Login(string username)
@@ -94,7 +126,7 @@ namespace ConsoleClient
                     if (key.Key == ConsoleKey.Backspace)
                     {
                         if (pwd.Length > 0)
-                            pwd.Remove(pwd.Length - 1,pwd.Length);
+                            pwd.Remove(pwd.Length - 1,pwd.Length-1);
                     }
                     if (key.KeyChar != '\u0000')
                         pwd.Append(key.KeyChar); 

@@ -56,6 +56,8 @@ Resources:
       CodeUri: ./src/Hub433Backend/
       Handler: Hub433Backend::Hub433Backend.ClaimDevice::FunctionHandler
       Runtime: dotnetcore3.1
+      Policies:
+        - AmazonDynamoDBFullAccess
       Events:
         Hub433Api:
           Type: IoTRule # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api

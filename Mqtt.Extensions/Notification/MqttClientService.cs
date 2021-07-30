@@ -15,6 +15,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Client.Connecting;
+using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Client.Subscribing;
@@ -41,7 +43,7 @@ namespace mqtt.Notification
         public Task<string> PublishWithResult(string topic, string body, CancellationToken token);
     }
     
-    public class MqttClientService : IMqttClientService, IMqttApplicationMessageReceivedHandler
+    public class MqttClientService : IMqttClientService, IMqttApplicationMessageReceivedHandler, IMqttClientConnectedHandler, IMqttClientDisconnectedHandler
     {
         public class NotificationMessage
         {
@@ -81,6 +83,8 @@ namespace mqtt.Notification
         {
             _client = client;
             _client.ApplicationMessageReceivedHandler = this;
+            _client.ConnectedHandler = this;
+            _client.DisconnectedHandler = this;
         }
 
         public async Task Connect(string clientId, string host, X509Certificate2 certificate, RSA privateKey)
@@ -293,6 +297,16 @@ namespace mqtt.Notification
                     }
                 }
             }
+        }
+
+        public Task HandleConnectedAsync(MqttClientConnectedEventArgs eventArgs)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task HandleDisconnectedAsync(MqttClientDisconnectedEventArgs eventArgs)
+        {
+            return Task.CompletedTask;
         }
     }
 }
