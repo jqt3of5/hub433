@@ -21,7 +21,7 @@ namespace RPINode
         
         [HttpPost]
         [Route("claim")]
-        public async Task<IActionResult> Claim([FromBody]ClaimCodeRequest config)
+        public async Task<IActionResult> Claim([FromBody]ClaimDeviceRequest config)
         {
             await _service.Publish($"thing/{_service.ThingName}/claim", JsonConvert.SerializeObject(config));
             return Ok();

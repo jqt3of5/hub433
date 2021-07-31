@@ -35,7 +35,7 @@ namespace mqtt.Notification
         public Task<bool> Subscribe(string route, MqttClientService.RouteHandler func);
         public Task<bool> Subscribe(string route, MethodInfo method, object instance);
         public Task<bool> Subscribe(string topic); 
-        public Task<bool> Subscribe(IMqttApplicationMessageReceivedHandler messageHandler);
+        public Task<bool> AddHandler(IMqttApplicationMessageReceivedHandler messageHandler);
         public Task<bool> Unsubscribe(string topic);
         public Task<bool> RemoveHandler(IMqttApplicationMessageReceivedHandler handler);
         
@@ -162,7 +162,7 @@ namespace mqtt.Notification
             return true;
         }
 
-        public Task<bool> Subscribe(IMqttApplicationMessageReceivedHandler messageHandler)
+        public Task<bool> AddHandler(IMqttApplicationMessageReceivedHandler messageHandler)
         {
             _otherHandlers.Add(messageHandler);
             return Task.FromResult(true);

@@ -4,6 +4,7 @@ using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Moq;
 using Newtonsoft.Json;
+using Node.Abstractions;
 using NUnit.Framework;
 
 namespace Hub433Backend.Tests
@@ -14,7 +15,7 @@ namespace Hub433Backend.Tests
         [Test]
         public void TestGenerateClaimCode()
         {
-            var claimCode = GenerateClaimCode.BuildClaimCode(new GenerateClaimCode.ClaimCodeRequest()
+            var claimCode = GenerateClaimCode.BuildClaimCode(new GenerateClaimCodeRequest()
             {
                 email = "jqt3of5@gmail.com",
                 guid = "123456"
@@ -25,7 +26,7 @@ namespace Hub433Backend.Tests
         [Test]
         public void TestValidateClaimCode()
         {
-            var claimCode = GenerateClaimCode.BuildClaimCode(new GenerateClaimCode.ClaimCodeRequest()
+            var claimCode = GenerateClaimCode.BuildClaimCode(new GenerateClaimCodeRequest()
             {
                 email = "jqt3of5@gmail.com",
                 guid = "123456"
@@ -38,7 +39,7 @@ namespace Hub433Backend.Tests
         [Test]
         public void TestInvalidClaimCode()
         {
-            var claimCode = GenerateClaimCode.BuildClaimCode(new GenerateClaimCode.ClaimCodeRequest()
+            var claimCode = GenerateClaimCode.BuildClaimCode(new GenerateClaimCodeRequest()
             {
                 email = "jqt3of5@gmail.com",
                 guid = "123456"
@@ -77,14 +78,14 @@ namespace Hub433Backend.Tests
         public async Task TestClaimDevice()
         {
             var context = new Mock<ILambdaContext>();
-            var claimCode = GenerateClaimCode.BuildClaimCode(new GenerateClaimCode.ClaimCodeRequest()
+            var claimCode = GenerateClaimCode.BuildClaimCode(new GenerateClaimCodeRequest()
             {
                 email = "jqt3of5@gmail.com",
                 guid = "12345"
             }, GenerateClaimCode.SignatureKey);
 
             var claimer = new ClaimDevice();
-            await claimer.FunctionHandler(new ClaimDevice.ClaimCodeRequest()
+            await claimer.FunctionHandler(new ClaimDeviceRequest()
             {
                 ClaimCode = claimCode,
                 ThingName = "UnitTestThing"

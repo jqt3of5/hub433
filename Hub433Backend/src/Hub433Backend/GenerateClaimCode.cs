@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.APIGatewayEvents;
 using Newtonsoft.Json.Linq;
+using Node.Abstractions;
 
 namespace Hub433Backend 
 {
@@ -18,15 +19,10 @@ namespace Hub433Backend
     {
         private static readonly HttpClient client = new HttpClient();
 
-        public class ClaimCodeRequest
-        {
-            public string email { get; set; }
-            public string guid { get; set; } 
-        }
 
         //TODO: Secret in code! Bad!!
         public static string SignatureKey = ";lk@#$asdf@daf#";
-        public static string BuildClaimCode(ClaimCodeRequest request, string sharedKey)
+        public static string BuildClaimCode(GenerateClaimCodeRequest request, string sharedKey)
         {
             var signature = SignRequestCode(request, sharedKey); 
             var claimCodeObject = new Dictionary<string, string>()
@@ -40,7 +36,7 @@ namespace Hub433Backend
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(claimCodeObject))); 
         }
         
-        public static string SignRequestCode(ClaimCodeRequest request, string sharedKey)
+        public static string SignRequestCode(GenerateClaimCodeRequest request, string sharedKey)
         {
             var hmac = HMAC.Create("hmacsha256");
             hmac.Initialize();
@@ -69,7 +65,7 @@ namespace Hub433Backend
                 return false;
             }
             
-            var signature = SignRequestCode(new ClaimCodeRequest()
+            var signature = SignRequestCode(new GenerateClaimCodeRequest()
             {
                 email = claimCodeObject["email"],
                 guid = claimCodeObject["guid"],
@@ -83,7 +79,7 @@ namespace Hub433Backend
         {
             if (apigProxyEvent.RequestContext.Authorizer.TryGetValue("claims", out var o) && o is JObject claims)
             {
-                var claimCode = BuildClaimCode(new ClaimCodeRequest()
+                var claimCode = BuildClaimCode(new GenerateClaimCodeRequest()
                 {
                     email = claims["email"].ToString(),
                     guid = Guid.NewGuid().ToString()

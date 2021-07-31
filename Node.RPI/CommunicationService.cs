@@ -42,7 +42,7 @@ namespace RPINode
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
-            await _mqttClientService.Subscribe(this);
+            await _mqttClientService.AddHandler(this);
             await _mqttClientService.Subscribe($"capability/{_mqttClientService.ThingName}");
 
             await base.StartAsync(cancellationToken);
@@ -66,7 +66,9 @@ namespace RPINode
                     var payload = eventArgs.ApplicationMessage.Payload;
                     var capabilityRequest =
                         JsonSerializer.Deserialize<DeviceCapabilityRequest>(Encoding.UTF8.GetString(payload));
+                    
                     var response = await _capabilityService.InvokeCapability(capabilityRequest);
+                    
                     if (!string.IsNullOrEmpty(eventArgs.ApplicationMessage.ResponseTopic))
                     {
                         await _mqttClientService.Publish(eventArgs.ApplicationMessage.ResponseTopic,

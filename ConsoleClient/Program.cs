@@ -33,6 +33,7 @@ namespace ConsoleClient
                     getDefaultValue: () => defaultBaseUrl,
                     description: "The base URL of our api"),
             };
+            
             var claimCommand = new Command("claim", "Generates a claim code for an unclaimed thing, and sends it to the thing server for validation")
             {
                 new Option("--user",
@@ -183,7 +184,7 @@ namespace ConsoleClient
                 awsClient.AddDefaultHeader("Authorization", result.IdToken); 
                 
                 var request = new RestRequest("Stage/thing/claimcode");
-                var claimCodeResponse = awsClient.Get<ClaimCodeRequest>(request);
+                var claimCodeResponse = awsClient.Get<GenerateClaimCodeRequest>(request);
 
                 if (!claimCodeResponse.IsSuccessful)
                 {

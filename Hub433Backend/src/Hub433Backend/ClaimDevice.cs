@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 
 using Amazon.Lambda.Core;
 using Amazon.Lambda.APIGatewayEvents;
+using Node.Abstractions;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -22,12 +23,7 @@ namespace Hub433Backend
 {
     public class ClaimDevice
     {
-        public class ClaimCodeRequest
-        {
-            public string ClaimCode { get; set; }
-            public string ThingName { get; set; }
-        }
-        public async Task FunctionHandler(ClaimCodeRequest request, ILambdaContext context)
+        public async Task FunctionHandler(ClaimDeviceRequest request, ILambdaContext context)
         {
             if (GenerateClaimCode.ValidateClaimCode(request.ClaimCode, GenerateClaimCode.SignatureKey, out var email))
             {
