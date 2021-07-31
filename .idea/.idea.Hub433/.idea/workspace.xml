@@ -8,21 +8,13 @@
     <projectFile>ConsoleClient/ConsoleClient.csproj</projectFile>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec4ed5fc-664c-4e8d-bee4-d8dfab8e9cc5" name="Default Changelist" comment="commit so I can pull">
-      <change afterPath="$PROJECT_DIR$/Hub433Backend/Hub433Backend.Tests/ClaimCodeTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/Hub433ThingsTableSchema.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Node.RPI/ClaimCodeRequest.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/indexLayout.xml" afterDir="false" />
+    <list default="true" id="ec4ed5fc-664c-4e8d-bee4-d8dfab8e9cc5" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/AuthorizeUser.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/GetShadow.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/.name" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ConsoleClient/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ConsoleClient/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Hub433Backend/Hub433Backend.Tests/CreateThingTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Hub433Backend/Hub433Backend.Tests/CreateThingTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/ClaimDevice.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/ClaimDevice.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/CreateThing.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/CreateThing.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/GenerateClaimCode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/GenerateClaimCode.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/Hub433Backend.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/Hub433Backend.csproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Hub433Backend/template.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Hub433Backend/template.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Node.RPI/ConfigureController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Node.RPI/ConfigureController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Node.RPI/ConfigureDTO.cs" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -188,7 +180,7 @@
   <component name="RunManager" selected=".NET Project.ConsoleClient">
     <configuration name="ConsoleClient" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="$PROJECT_DIR$/ConsoleClient/bin/Debug/net5.0/ConsoleClient.exe" />
-      <option name="PROGRAM_PARAMETERS" value="generateclaimcode jqt3of5" />
+      <option name="PROGRAM_PARAMETERS" value="shadow TestingThing --user jqt3of5" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ConsoleClient/bin/Debug/net5.0" />
       <option name="PASS_PARENT_ENVS" value="1" />
       <option name="USE_EXTERNAL_CONSOLE" value="0" />
@@ -307,7 +299,9 @@
       <workItem from="1625505824853" duration="9108000" />
       <workItem from="1626016262758" duration="26801000" />
       <workItem from="1627230193182" duration="73000" />
-      <workItem from="1627230294910" duration="5861000" />
+      <workItem from="1627230294910" duration="8074000" />
+      <workItem from="1627619506587" duration="1399000" />
+      <workItem from="1627661399827" duration="2160000" />
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <created>1620614873309</created>
@@ -414,7 +408,14 @@
       <option name="project" value="LOCAL" />
       <updated>1627230314649</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Testing and improving the claimcode process">
+      <created>1627266196950</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1627266196950</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -451,7 +452,8 @@
     <MESSAGE value="Migrated the RPI client service over to the new paradigm. Should be all set up, just need to figure out how to connect to the aws IoT service" />
     <MESSAGE value="Fixing the certificates" />
     <MESSAGE value="commit so I can pull" />
-    <option name="LAST_COMMIT_MESSAGE" value="commit so I can pull" />
+    <MESSAGE value="Testing and improving the claimcode process" />
+    <option name="LAST_COMMIT_MESSAGE" value="Testing and improving the claimcode process" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -497,7 +499,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/Mqtt.Extensions/Notification/MqttClientService.cs</url>
-          <line>257</line>
+          <line>255</line>
           <properties documentPath="C:\Users\jqt3o\sd\Hub433\Mqtt.Extensions\Notification\MqttClientService.cs" initialLine="174" containingFunctionPresentation="method 'HandleApplicationMessageReceivedAsync'">
             <startOffsets>
               <option value="10421" />
@@ -536,7 +538,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/Mqtt.Extensions/Notification/MqttClientService.cs</url>
-          <line>279</line>
+          <line>277</line>
           <properties documentPath="C:\Users\jqt3o\sd\Hub433\Mqtt.Extensions\Notification\MqttClientService.cs" initialLine="197" containingFunctionPresentation="method 'HandleApplicationMessageReceivedAsync'">
             <startOffsets>
               <option value="11653" />
@@ -549,7 +551,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/Mqtt.Extensions/Notification/MqttClientService.cs</url>
-          <line>227</line>
+          <line>231</line>
           <properties documentPath="C:\Users\jqt3o\sd\Hub433\Mqtt.Extensions\Notification\MqttClientService.cs" initialLine="155" containingFunctionPresentation="method 'InvokeWithMappedParameters'">
             <startOffsets>
               <option value="9239" />
@@ -562,7 +564,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/Mqtt.Extensions/Notification/MqttClientService.cs</url>
-          <line>119</line>
+          <line>123</line>
           <properties documentPath="C:\Users\jqt3o\sd\Hub433\Mqtt.Extensions\Notification\MqttClientService.cs" initialLine="91" containingFunctionPresentation="method 'Connect'">
             <startOffsets>
               <option value="4853" />

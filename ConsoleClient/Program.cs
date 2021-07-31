@@ -112,7 +112,6 @@ namespace ConsoleClient
                    CapabilityAction = capabilityAction,
                    CapabilityType = capabilityType,
                    CapabilityVersion = capabilityVersion,
-                   arguments = 
                 });
                 var response = awsClient.Get<ThingCreatedResponse>(request);
                 

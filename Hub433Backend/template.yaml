@@ -41,6 +41,8 @@ Resources:
       CodeUri: ./src/Hub433Backend/
       Handler: Hub433Backend::Hub433Backend.GenerateClaimCode::FunctionHandler
       Runtime: dotnetcore3.1
+      Policies:
+        - AmazonDynamoDBFullAccess
       Events:
         Hub433Api:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -49,6 +51,24 @@ Resources:
             Auth:
               DefaultAuthorizer: Hub433UsersAuthorizer
             Path: /thing/create
+            Method: get
+  GetShadowFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/Hub433Backend/
+      Handler: Hub433Backend::Hub433Backend.GetShadow::FunctionHandler
+      Runtime: dotnetcore3.1
+      Policies:
+        - AmazonDynamoDBFullAccess
+        - AWSIoTConfigReadOnlyAccess
+      Events:
+        Hub433Api:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref Hub433Api
+            Auth:
+              DefaultAuthorizer: Hub433UsersAuthorizer
+            Path: /thing/shadow/{thingName}
             Method: get
   ClaimDeviceFunction:
     Type: AWS::Serverless::Function
