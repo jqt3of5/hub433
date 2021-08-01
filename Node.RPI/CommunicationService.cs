@@ -34,7 +34,6 @@ namespace RPINode
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //TODO: Should I do this?
             await _mqttClientService.Publish($"$aws/things/{_mqttClientService.ThingName}/shadow/get", string.Empty);
             
             while (!stoppingToken.IsCancellationRequested)
@@ -70,6 +69,11 @@ namespace RPINode
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
             await _mqttClientService.Unsubscribe($"capability/{_mqttClientService.ThingName}");
+            await _mqttClientService.Unsubscribe(
+                $"$aws/things/{_mqttClientService.ThingName}/shadow/update/delta");
+            
+            await _mqttClientService.Unsubscribe(
+                $"$aws/things/{_mqttClientService.ThingName}/shadow/update/documents");
 
             await base.StopAsync(cancellationToken);
         }
@@ -77,7 +81,9 @@ namespace RPINode
         public class ShadowState
         {
             public DeviceCapabilityRequest[] capabilities { get; set; }
+            public Dictionary<string, string> values { get; set; }
         }
+        
         public class ShadowDelta
         {
             public int version { get; set; }
@@ -85,6 +91,7 @@ namespace RPINode
             public ShadowState state { get; set; }
             public Dictionary<string, object> metadata { get; set; }
         }
+        
         public class ShadowUpdate 
         {
             public int? version { get; set; } 
@@ -104,14 +111,23 @@ namespace RPINode
             public ShadowUpdateMetadata metadata { get; set; }
         }
         
+        /// <summary>
+        /// the handler for getting the current shadow. Should only be called once after the device connects to the server
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
         private async Task HandleGetShadow(MqttClientService.NotificationMessage message)
         {
             //Handle this message only once after startup
             await _mqttClientService.Unsubscribe($"$aws/things/{_mqttClientService.ThingName}/shadow/get/accepted");
-            Console.WriteLine("GetShadow");
             
-            //TODO: Synchronize state after a restart
             var doc = message.GetPayload<ShadowUpdate>();
+            
+            foreach (var request in doc.state.desired.capabilities)
+            {
+                await _capabilityService.InvokeCapability(request);
+            }
+            
             doc.version = null;
             doc.timestamp = null;
             doc.state.reported = doc.state.desired;
@@ -127,11 +143,14 @@ namespace RPINode
         
         private async Task HandleShadowDelta(MqttClientService.NotificationMessage message)
         {
-            Console.WriteLine("ShadowDelta");
             var delta = message.GetPayload<ShadowDelta>();
             
-            //TODO: Process the delta as capability requests 
-            
+            foreach (var request in delta.state.capabilities)
+            {
+                await _capabilityService.InvokeCapability(request);
+            }
+
+            //Our state should be updated by now, publish back to aws
             await _mqttClientService.Publish($"$aws/things/{_mqttClientService.ThingName}/shadow/update",
                 JsonSerializer.Serialize(new ShadowUpdate()
                 {

@@ -17,7 +17,7 @@ namespace RPINode
         private readonly Receiver433 _receiver433;
         private readonly DhtCore _dht;
 
-        private List<(string Version, string Name, Type Type)> _capabilityTypes = new();
+        private List<(string Version, string Name, ICapability capability)> _capabilities= new();
         public CapabilityService(IGpioController pins)
         {
             //Create Connected Peripheral Instances
@@ -26,11 +26,14 @@ namespace RPINode
             _dht = new DhtCore(pins[BcmPin.Gpio22]);
 
             //Register the available capabilities 
-            RegisterCapability<BlindsCapability>();
-            RegisterCapability<RemoteRelayCapability>();
+            RegisterCapability(new BlindsCapability(_transmitter433));
+            RegisterCapability(new RemoteRelayCapability(_transmitter433));
+            RegisterCapability(new ConnectedRelayCapability(
+                new Relay(pins[BcmPin.Gpio18]
+                )));
         }
 
-        public bool RegisterCapability<T>() where T : ICapability
+        public bool RegisterCapability<T>(T capability) where T : ICapability
         {
             var attribute = (CapabilityAttribute)typeof(T).GetCustomAttribute(typeof(CapabilityAttribute));
             if (attribute == null)
@@ -38,41 +41,35 @@ namespace RPINode
                 return false;
             }
 
-            _capabilityTypes.Add((attribute.Version, attribute.Name, typeof(T)));
+            _capabilities.Add((attribute.Version, attribute.Name, capability));
             return true;
         }
 
         public async Task<object?> InvokeCapability(DeviceCapabilityRequest request)
         {
             //First find the matching capabilty/version
-            foreach (var capabilityType in _capabilityTypes)
+            foreach (var capability in _capabilities)
             {
-                if (capabilityType.Version == request.CapabilityVersion && capabilityType.Name == request.CapabilityType)
+                if (capability.Version == request.CapabilityVersion && capability.Name == request.CapabilityType)
                 {
                     //Next find the method to perform the action
-                    var methodInfo = capabilityType.Type.GetMethod(request.CapabilityAction);
+                    var methodInfo = capability.capability.GetType().GetMethod(request.CapabilityAction);
                     if (methodInfo != null)
                     {
                         //Create the capability handler
-                        //TODO: It might take other kinds of arguments. But they both only need a transmitter for now....
-                        //TODO: Find a better DI way to do this sort of thing
-                        var capability = Activator.CreateInstance(capabilityType.Type, _transmitter433);
-                        if (capability != null)
+                        var result = InvokeWithMappedParameters(request.arguments, methodInfo, capability);
+                
+                        if (result is Task<object?> taskReturn)
                         {
-                            var result = InvokeWithMappedParameters(request.arguments, methodInfo, capability);
-                    
-                            if (result is Task<object?> taskReturn)
-                            {
-                                return await taskReturn;
-                            }
-                            if (result is Task task)
-                            {
-                                await task;
-                                return Task.FromResult<object?>(null);
-                            }
-                    
-                            return Task.FromResult(result);  
+                            return await taskReturn;
                         }
+                        if (result is Task task)
+                        {
+                            await task;
+                            return Task.FromResult<object?>(null);
+                        }
+                
+                        return Task.FromResult(result);  
                     }
                 }
             }

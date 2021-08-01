@@ -9,7 +9,7 @@ namespace RPINode.Capability
     {
         private readonly Relay[] _relays;
 
-        public ConnectedRelayCapability(Relay [] relays)
+        public ConnectedRelayCapability(params Relay [] relays)
         {
             _relays = relays;
         }
