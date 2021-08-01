@@ -11,6 +11,8 @@ namespace Node.Hardware.Peripherals
         private readonly IGpioPin _pin;
         public int BcmPin => _pin.BcmPinNumber;
 
+        private object _lock = new object();
+        
         public Transmitter433(IGpioPin pin)
         {
             _pin = pin;
@@ -23,20 +25,23 @@ namespace Node.Hardware.Peripherals
         {
             return Task.Run(() =>
             {
-                // Console.WriteLine("Starting transmit");
-                var sw = new Stopwatch();
-                foreach (var symbol in symbols)
+                lock (_lock)
                 {
-                    // _pin.Write(symbol.Value ? 1 : 0);
-                    _pin.Value = symbol.Value;
-                    sw.Restart();
-                    var ticks = Stopwatch.Frequency / 1000000 * symbol.DurationUS;
-                    // ReSharper disable once EmptyEmbeddedStatement
-                    while (sw.ElapsedTicks < ticks);
-                }  
-                // _pin.Write(0);
-                _pin.Value = false;
-                // Console.WriteLine("Transmit Done");                
+                    // Console.WriteLine("Starting transmit");
+                    var sw = new Stopwatch();
+                    foreach (var symbol in symbols)
+                    {
+                        // _pin.Write(symbol.Value ? 1 : 0);
+                        _pin.Value = symbol.Value;
+                        sw.Restart();
+                        var ticks = Stopwatch.Frequency / 1000000 * symbol.DurationUS;
+                        // ReSharper disable once EmptyEmbeddedStatement
+                        while (sw.ElapsedTicks < ticks);
+                    }  
+                    // _pin.Write(0);
+                    _pin.Value = false;
+                    // Console.WriteLine("Transmit Done");            
+                }
             });
         }
     }
