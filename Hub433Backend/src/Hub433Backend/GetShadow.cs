@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
@@ -11,6 +12,8 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.IoT;
 using Amazon.IoT.Model;
+using Amazon.IotData;
+using Amazon.IotData.Model;
 using Newtonsoft.Json;
 
 using Amazon.Lambda.Core;
@@ -27,19 +30,33 @@ namespace Hub433Backend
             {
                 var authorizeUser = new AuthorizeUser();
 
-                if (request.RequestContext.Authorizer.TryGetValue("claims", out var o) && o is JObject claims)
+                if (request.PathParameters.TryGetValue("thingName", out var thingName) &&
+                    request.RequestContext.Authorizer.TryGetValue("claims", out var o) && o is JObject claims)
                 {
                     var email = claims["email"].ToString();
-                    if (request.PathParameters.TryGetValue("thingName", out var thingName) &&
-                        await authorizeUser.CanUserGetThingShadow(email, thingName))
+                    if (await authorizeUser.CanUserGetThingShadow(email, thingName))
                     {
-                        var client = new AmazonIoTClient();
-
-                        return new APIGatewayProxyResponse()
+                        var client = new AmazonIoTClient(RegionEndpoint.USWest1);
+                        var endpoint = await client.DescribeEndpointAsync(new DescribeEndpointRequest()
                         {
-                        Body = JsonConvert.SerializeObject(await client.DescribeThingAsync(thingName)),
-                            StatusCode = 200
-                        };
+                            EndpointType = "iot:Data-ATS"
+                        });
+
+                        var dataClient = new AmazonIotDataClient($"https://{endpoint.EndpointAddress}");
+                        var shadow = await dataClient.GetThingShadowAsync(new GetThingShadowRequest()
+                        {
+                            ThingName = thingName,
+                            ShadowName = string.Empty
+                        });
+
+                        using (var reader = new StreamReader(shadow.Payload))
+                        {
+                            return new APIGatewayProxyResponse()
+                            {
+                                Body = await reader.ReadToEndAsync(),
+                                StatusCode = 200
+                            }; 
+                        }
                     }
                     return new APIGatewayProxyResponse()
                     {

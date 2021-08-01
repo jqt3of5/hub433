@@ -31,5 +31,6 @@
         }
         
         public static implicit operator T(Defaultable<T> d) => d.Value;
+        public static implicit operator Defaultable<T>(T t) => new Defaultable<T>(t).Set(t);
     }
 }

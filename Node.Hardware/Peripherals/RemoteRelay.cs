@@ -18,20 +18,19 @@ namespace Node.Hardware.Peripherals
            
        }
 
-       public async Task Pwm(int channel, float dutyCycle, float cyclesPerSecond)
+       public async Task Pwm(int channel, (int port, float dutyCycle, float cyclesPerSecond) [] values)
        {
            
        }
        
-       public async Task On(int channel)
+       public async Task On(int channel, int [] ports)
        {
            
        }
 
-       public async Task Off(int channel)
+       public async Task Off(int channel, int [] ports)
        {
            
        }
-     
     }
 }

@@ -50,6 +50,7 @@ namespace ConsoleClient
             {
                 new Argument("thingName"),
                 new Argument("capability"),
+                new Argument("arguments"),
                 new Option("--user",
                     getDefaultValue: () => "", 
                     description: "The specific user to validate as"),
@@ -84,7 +85,7 @@ namespace ConsoleClient
                 getThingShadow
             };
             
-            invokeCapability.Handler = CommandHandler.Create<string,string, string, string, string, string>(async (thingName, capabilityType, capabilityAction, capabilityVersion, user, baseUrl) =>
+            invokeCapability.Handler = CommandHandler.Create<string,string, string, string, string, string, string>(async (thingName, arguments, capabilityType, capabilityAction, capabilityVersion, user, baseUrl) =>
             {
                 if (string.IsNullOrEmpty(capabilityAction) || string.IsNullOrEmpty(capabilityType))
                 {
@@ -113,6 +114,7 @@ namespace ConsoleClient
                    CapabilityAction = capabilityAction,
                    CapabilityType = capabilityType,
                    CapabilityVersion = capabilityVersion,
+                   arguments = arguments.Split(",")
                 });
                 var response = awsClient.Get<ThingCreatedResponse>(request);
                 

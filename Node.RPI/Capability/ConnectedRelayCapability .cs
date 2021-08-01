@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Node.Abstractions;
 using Node.Hardware.Peripherals;
 
@@ -27,17 +28,19 @@ namespace RPINode.Capability
         [CapabilityAction]
         public Task On(int port)
         {
-            return Get(port)?.TrySetValue(1);
+            return Get(port)?.SetDutyCycle(1);
         }  
         [CapabilityAction]
         public Task Off(int port)
         {
-            return Get(port)?.TrySetValue(0);
+            return Get(port)?.SetDutyCycle(0);
         } 
         [CapabilityAction]
         public Task Pwm(int port, float dutyCycle, float cyclesPerSecond)
         {
-            return Get(port)?.TrySetValue(dutyCycle);
+            var relay = Get(port);
+            relay.PwmPeriod = TimeSpan.FromSeconds(1 / cyclesPerSecond);
+            return Get(port)?.SetDutyCycle(dutyCycle);
         } 
     }
 }

@@ -21,6 +21,12 @@ namespace RPINode.Capability
         }
 
         [CapabilityAction]
+        public Task Stop(Blinds.BlindsChannel channel)
+        {
+            return new Blinds(_transmitter433).Broadcast(channel, Blinds.BlindsCommand.Stop);
+        }
+        
+        [CapabilityAction]
         public Task Open(Blinds.BlindsChannel channel)
         {
             return new Blinds(_transmitter433).Broadcast(channel, Blinds.BlindsCommand.Open);

@@ -45,9 +45,9 @@ namespace Node.Hardware.Peripherals
             _wavePart = !_wavePart;
         }
 
-        public Task TrySetValue(float value)
+        public Task SetDutyCycle(float dutyCycle)
         {
-            PwmValue = (int) (value * PwmRange);
+            PwmValue = (int) (dutyCycle * PwmRange);
             _lowPeriod = PwmPeriod.Value * ((float)PwmValue / PwmRange);
             _highPeriod = PwmPeriod.Value * ((float)(PwmRange - PwmValue) / PwmRange);
             

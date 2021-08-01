@@ -21,19 +21,19 @@ namespace RPINode.Capability
         } 
         
         [CapabilityAction]
-        public Task On(int channel)
+        public Task On(int channel, int [] ports)
         {
-            return new RemoteRelay(_transmitter433).On(channel);
+            return new RemoteRelay(_transmitter433).On(channel, ports);
         }  
         [CapabilityAction]
-        public Task Off(int channel)
+        public Task Off(int channel, int [] ports)
         {
-            return new RemoteRelay(_transmitter433).Off(channel);
+            return new RemoteRelay(_transmitter433).Off(channel, ports);
         } 
         [CapabilityAction]
-        public Task Pwm(int channel, float dutyCycle, float cyclesPerSecond)
+        public Task Pwm(int channel, (int port, float dutyCycle, float cyclesPerSecond) [] values)
         {
-            return new RemoteRelay(_transmitter433).Pwm(channel, dutyCycle, cyclesPerSecond);
+            return new RemoteRelay(_transmitter433).Pwm(channel, values);
         } 
     }
 }

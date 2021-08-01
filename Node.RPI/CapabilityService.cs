@@ -23,7 +23,7 @@ namespace RPINode
             //Create Connected Peripheral Instances
             _transmitter433 = new Transmitter433(pins[BcmPin.Gpio17]);
             _receiver433 = new Receiver433(pins[BcmPin.Gpio23]);
-            _dht = new DhtCore(pins[BcmPin.Gpio22]);
+            // _dht = new DhtCore(pins[BcmPin.Gpio22]);
 
             //Register the available capabilities 
             RegisterCapability(new BlindsCapability(_transmitter433));
@@ -50,6 +50,7 @@ namespace RPINode
             //First find the matching capabilty/version
             foreach (var capability in _capabilities)
             {
+                //TODO: Support "latest" version name. (version selectors too maybe?)
                 if (capability.Version == request.CapabilityVersion && capability.Name == request.CapabilityType)
                 {
                     //Next find the method to perform the action
