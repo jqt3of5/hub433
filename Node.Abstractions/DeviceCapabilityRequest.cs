@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Node.Abstractions
 {
     public interface ICapability
     {
     }
-    
+  
     public struct DeviceCapabilityRequest
     {
         public string CapabilityType { get; set; } 

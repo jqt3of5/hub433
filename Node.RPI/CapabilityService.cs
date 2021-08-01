@@ -5,8 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Node.Abstractions;
-using Node.Hardware.Capability;
 using Node.Hardware.Peripherals;
+using RPINode.Capability;
 using Unosquare.RaspberryIO.Abstractions;
 
 namespace RPINode
@@ -15,6 +15,7 @@ namespace RPINode
     {
         private readonly Transmitter433 _transmitter433;
         private readonly Receiver433 _receiver433;
+        private readonly DhtCore _dht;
 
         private List<(string Version, string Name, Type Type)> _capabilityTypes = new();
         public CapabilityService(IGpioController pins)
@@ -22,6 +23,7 @@ namespace RPINode
             //Create Connected Peripheral Instances
             _transmitter433 = new Transmitter433(pins[BcmPin.Gpio17]);
             _receiver433 = new Receiver433(pins[BcmPin.Gpio23]);
+            _dht = new DhtCore(pins[BcmPin.Gpio22]);
 
             //Register the available capabilities 
             RegisterCapability<BlindsCapability>();

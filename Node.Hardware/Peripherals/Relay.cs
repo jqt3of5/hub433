@@ -8,7 +8,6 @@ namespace Node.Hardware.Peripherals
 {
     public class Relay
     {
-        readonly int PwmRange = 255;
         public Defaultable<TimeSpan> MinDutyPeriod { get; set; } = Defaultable.FromDefault(TimeSpan.Zero);
 
         public Defaultable<TimeSpan> PwmPeriod { get; set; } = Defaultable.FromDefault(TimeSpan.FromSeconds(2));
@@ -21,9 +20,10 @@ namespace Node.Hardware.Peripherals
         private TimeSpan _lowPeriod;
         private TimeSpan _highPeriod;
         
+        const int PwmRange = 1024;
         public int PwmValue { get; set; }
 
-        public float Value => (float)PwmValue / PwmRange;
+        public float DutyCycle => (float)PwmValue / PwmRange;
 
         public Relay(IGpioPin pin)
         {

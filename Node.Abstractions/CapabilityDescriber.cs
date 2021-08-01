@@ -80,6 +80,9 @@ namespace Node.Abstractions
         }
     }
 
+    /// <summary>
+    /// A Capability is a class that represents some type of device connected to the hub. It can be a locally connected relay, or a much more complicated PID system
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, Inherited = false, AllowMultiple = true)]
     public sealed class CapabilityAttribute : Attribute
     {
@@ -95,6 +98,10 @@ namespace Node.Abstractions
         }
     } 
     
+    /// <summary>
+    /// A Capability action is an action that can be performed to interact with some connected device.
+    /// the action may have a return value 
+    /// </summary>
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
     public sealed class CapabilityActionAttribute : Attribute
     {
