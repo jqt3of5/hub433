@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -63,6 +64,10 @@ namespace RPINode
                 $"$aws/things/{_mqttClientService.ThingName}/shadow/get/accepted", 
                 HandleGetShadow);
             
+            await _mqttClientService.Subscribe(
+                $"$aws/things/{_mqttClientService.ThingName}/tunnel/notify", 
+                HandleTunnelNotify); 
+            
             await base.StartAsync(cancellationToken);
         }
 
@@ -78,6 +83,14 @@ namespace RPINode
             await base.StopAsync(cancellationToken);
         }
 
+        public class StartTunnelRequest
+        {
+            public string clientAccessToken { get; set; }
+            public string clientMode { get; set; }
+            public string region { get; set; }
+            public string [] services { get; set; } 
+            
+        }
         public class ShadowState
         {
             public DeviceCapabilityRequest[] capabilities { get; set; }
@@ -110,7 +123,33 @@ namespace RPINode
             public ShadowUpdateState state { get; set; }
             public ShadowUpdateMetadata metadata { get; set; }
         }
-        
+
+        private async Task HandleTunnelNotify(MqttClientService.NotificationMessage message)
+        {
+            var request = message.GetPayload<StartTunnelRequest>();
+
+            if (request.clientMode != "destination")
+            {
+                return;
+            }
+
+            if (request.services.Length > 1)
+            {
+                return;
+            }
+
+            if (request.services.First() != "SSH")
+            {
+                return;
+            }
+            
+            // Start the destination local proxy in a separate process to connect to the SSH Daemon listening port 22
+            //final ProcessBuilder pb = new ProcessBuilder("localproxy",
+            //    "-t", accessToken,
+            //    "-r", region,
+            //    "-d", "localhost:22"); 
+
+        }
         /// <summary>
         /// the handler for getting the current shadow. Should only be called once after the device connects to the server
         /// </summary>
