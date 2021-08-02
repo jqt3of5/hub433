@@ -1,10 +1,14 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 using Node.Abstractions;
 using Node.Hardware.Peripherals;
 
 namespace RPINode.Capability
 {
-    [Capability("Blinds", "1.0.0")]
+    [Capability("Blinds")]
     public class BlindsCapability : ICapability
     {
         private readonly Transmitter433 _transmitter433;
@@ -13,44 +17,73 @@ namespace RPINode.Capability
         {
             _transmitter433 = transmitter433;
         }
-
-        [CapabilityAction]
+        
+        public class PairPayload
+        {
+           public int Channel { get; set; } 
+        }
+        
+        [CapabilityAction(typeof(PairPayload))]
         public Task Pair(Blinds.BlindsChannel channel)
         {
             return new Blinds(_transmitter433).Pair(channel);
         }
 
-        [CapabilityAction]
-        public Task Stop(Blinds.BlindsChannel channel)
+        public class ChannelCommandPayload
         {
-            return new Blinds(_transmitter433).Broadcast(channel, Blinds.BlindsCommand.Stop);
+            public Blinds.BlindsChannel Channel { get; set; }
+            
         }
         
-        [CapabilityAction]
-        public Task Open(Blinds.BlindsChannel channel)
+        public Task Stop(DeviceCapabilityActionRequest actionRequest)
         {
-            return new Blinds(_transmitter433).Broadcast(channel, Blinds.BlindsCommand.Open);
+            var payload = actionRequest.GetPayloadAs<ChannelCommandPayload>();
+            return new Blinds(_transmitter433).Broadcast(payload.Channel, Blinds.BlindsCommand.Stop);
         }
-       
-        [CapabilityAction]
-        public Task Close(Blinds.BlindsChannel channel)
+        public Task Up(DeviceCapabilityActionRequest actionRequest)
         {
-            return new Blinds(_transmitter433).Broadcast(channel, Blinds.BlindsCommand.Close);
+            var payload = actionRequest.GetPayloadAs<ChannelCommandPayload>();
+            return new Blinds(_transmitter433).Broadcast(payload.Channel, Blinds.BlindsCommand.Up);
         }
-       
-        [CapabilityAction]
-        public Task Set(Blinds.BlindsChannel channel, int increment)
+        public Task Down(DeviceCapabilityActionRequest actionRequest)
         {
-            if (increment > 0)
+            var payload = actionRequest.GetPayloadAs<ChannelCommandPayload>();
+            return new Blinds(_transmitter433).Broadcast(payload.Channel, Blinds.BlindsCommand.Down);
+        }
+
+        public class BlindsStatePayload
+        {
+            public Dictionary<Blinds.BlindsChannel, ChannelState> channels { get; set; }
+
+            public class ChannelState
             {
-                return new Blinds(_transmitter433).Broadcast(channel, Blinds.BlindsCommand.Down);
+                public enum BlindsState
+                {
+                    Open, 
+                    Closed
+                }
+                public BlindsState state { get; set; } 
             }
-            else if (increment < 0)
+        }
+        public async Task<object> Invoke(JsonElement request)
+        {
+            var payload = JsonSerializer.Deserialize<BlindsStatePayload>(request.GetRawText());
+
+            var blinds = new Blinds(_transmitter433);
+            foreach (var channelState in payload.channels)
             {
-                return new Blinds(_transmitter433).Broadcast(channel, Blinds.BlindsCommand.Up);
+                switch (channelState.Value.state)
+                {
+                   case BlindsStatePayload.ChannelState.BlindsState.Closed:
+                       await blinds.Broadcast(channelState.Key, Blinds.BlindsCommand.Close);
+                       break;
+                   case BlindsStatePayload.ChannelState.BlindsState.Open:
+                       await blinds.Broadcast(channelState.Key, Blinds.BlindsCommand.Close);
+                       break;
+                }
             }
 
-            return Task.CompletedTask;
+            return null;
         }
     }
 }

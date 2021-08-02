@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Amazon;
 using Amazon.CognitoIdentity;
@@ -50,7 +51,7 @@ namespace ConsoleClient
             {
                 new Argument("thingName"),
                 new Argument("capability"),
-                new Argument("arguments"),
+                new Argument("payload"),
                 new Option("--user",
                     getDefaultValue: () => "", 
                     description: "The specific user to validate as"),
@@ -85,7 +86,7 @@ namespace ConsoleClient
                 getThingShadow
             };
             
-            invokeCapability.Handler = CommandHandler.Create<string,string, string, string, string, string, string>(async (thingName, arguments, capabilityType, capabilityAction, capabilityVersion, user, baseUrl) =>
+            invokeCapability.Handler = CommandHandler.Create<string,string, string, string, string, string, string>(async (thingName, payload, capabilityType, capabilityAction, capabilityVersion, user, baseUrl) =>
             {
                 if (string.IsNullOrEmpty(capabilityAction) || string.IsNullOrEmpty(capabilityType))
                 {
@@ -109,13 +110,14 @@ namespace ConsoleClient
                 awsClient.AddDefaultHeader("Authorization", result.IdToken); 
                 
                 var request = new RestRequest($"Stage/thing/capability/{thingName}");
-                request.AddJsonBody(new DeviceCapabilityRequest()
+
+                request.AddJsonBody(new DeviceCapabilityActionRequest()
                 {
                    CapabilityAction = capabilityAction,
                    CapabilityType = capabilityType,
-                   CapabilityVersion = capabilityVersion,
-                   arguments = arguments.Split(",")
+                   Payload = JsonDocument.Parse(payload).RootElement
                 });
+                
                 var response = awsClient.Get<ThingCreatedResponse>(request);
                 
                 Console.WriteLine(response.Content); 

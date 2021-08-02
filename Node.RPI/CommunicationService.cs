@@ -10,13 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using mqtt.Notification;
-using MQTTnet;
-using MQTTnet.Client;
-using MQTTnet.Client.Receiving;
-using Newtonsoft.Json;
 using Node.Abstractions;
-using Unosquare.RaspberryIO.Abstractions;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace RPINode
 {
@@ -40,12 +34,27 @@ namespace RPINode
             while (!stoppingToken.IsCancellationRequested)
             {
                 var version = _configuration["version"];
-                await _mqttClientService.Publish($"device/{_mqttClientService.ThingName}/online", version);
+                var doc = new ShadowUpdate()
+                {
+                    state = new ShadowUpdate.ShadowUpdateState()
+                    {
+                        reported = new ShadowState()
+                        {
+                            connected = true,
+                            version = version
+                        }
+                    }
+                };
+                
+                await _mqttClientService.Publish($"$aws/things/{_mqttClientService.ThingName}/shadow/update", 
+                    JsonSerializer.Serialize(doc, 
+                        new JsonSerializerOptions()
+                        {
+                            //Mostly to ignore the timestamp, and version properties which don't need to be written
+                            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                        }));
                 await Task.Delay(10000, stoppingToken);
             }
-            
-            //TODO: Publish shutdown reason
-            await _mqttClientService.Publish($"device/{_mqttClientService.ThingName}/offline", "Cancellation Requested");
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)
@@ -73,6 +82,25 @@ namespace RPINode
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
+            var d = new ShadowUpdate()
+            {
+                state = new ShadowUpdate.ShadowUpdateState()
+                {
+                    reported = new ShadowState()
+                    {
+                        connected = false,
+                    }
+                }
+            };
+                
+            await _mqttClientService.Publish($"$aws/things/{_mqttClientService.ThingName}/shadow/update", 
+                JsonSerializer.Serialize(d, 
+                    new JsonSerializerOptions()
+                    {
+                        //Mostly to ignore the timestamp, and version properties which don't need to be written
+                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                    })); 
+            
             await _mqttClientService.Unsubscribe($"capability/{_mqttClientService.ThingName}");
             await _mqttClientService.Unsubscribe(
                 $"$aws/things/{_mqttClientService.ThingName}/shadow/update/delta");
@@ -93,8 +121,9 @@ namespace RPINode
         }
         public class ShadowState
         {
-            public DeviceCapabilityRequest[] capabilities { get; set; }
-            public Dictionary<string, string> values { get; set; }
+            public string? version { get; set; }
+            public bool? connected { get; set; }
+            public Dictionary<string, JsonElement> capabilities { get; set; }
         }
         
         public class ShadowDelta
@@ -161,10 +190,15 @@ namespace RPINode
             await _mqttClientService.Unsubscribe($"$aws/things/{_mqttClientService.ThingName}/shadow/get/accepted");
             
             var doc = message.GetPayload<ShadowUpdate>();
+
+            if (doc?.state?.desired?.capabilities == null)
+            {
+                return;
+            }
             
             foreach (var request in doc.state.desired.capabilities)
             {
-                await _capabilityService.InvokeCapability(request);
+                await _capabilityService.InvokeCapability(request.Key, request.Value);
             }
             
             doc.version = null;
@@ -184,9 +218,20 @@ namespace RPINode
         {
             var delta = message.GetPayload<ShadowDelta>();
             
+            //TODO: The delta will only include the property that was actually changed. 
+            //TODO: We might want to adjust the shadow json to be:
+            // {
+            //   "<capabilityType>" : {
+            //    "<channel>": {
+            //     "<port>": {
+            //      "State": "Open",
+            //      "Payload": {}
+            //     }
+            //   }
+            // }
             foreach (var request in delta.state.capabilities)
             {
-                await _capabilityService.InvokeCapability(request);
+                await _capabilityService.InvokeCapability(request.Key, request.Value);
             }
 
             //Our state should be updated by now, publish back to aws
@@ -215,10 +260,9 @@ namespace RPINode
         {
             try
             {
-                var capabilityRequest = message.GetPayload<DeviceCapabilityRequest>();
-                var response = await _capabilityService.InvokeCapability(capabilityRequest);
+                var capabilityRequest = message.GetPayload<DeviceCapabilityActionRequest>();
+                var response = await _capabilityService.InvokeCapabilityAction(capabilityRequest);
                 
-                //TODO: Instead of a response topic, should we publish to a shadow? 
                 if (!string.IsNullOrEmpty(message.InternalMessage.ResponseTopic))
                 {
                     await _mqttClientService.Publish(message.InternalMessage.ResponseTopic,

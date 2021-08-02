@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Node.Abstractions;
 using Node.Hardware.Peripherals;
 
 namespace RPINode.Capability
 {
-    [Capability("Relay", "1.0.0")]
+    [Capability("Relay")]
     public class ConnectedRelayCapability : ICapability
     {
         private readonly Relay[] _relays;
@@ -24,23 +25,44 @@ namespace RPINode.Capability
 
             return null;
         }
-        
-        [CapabilityAction]
-        public Task On(int port)
+
+        public class ConnectedRelayPortPayload
         {
-            return Get(port)?.SetDutyCycle(1);
+            public int Port { get; set; }
+        }
+        public Task On(DeviceCapabilityActionRequest actionRequest)
+        {
+            var payload = actionRequest.GetPayloadAs<ConnectedRelayPortPayload>();
+            return Get(payload.Port)?.SetDutyCycle(1);
         }  
-        [CapabilityAction]
-        public Task Off(int port)
+        
+        public Task Off(DeviceCapabilityActionRequest actionRequest)
         {
-            return Get(port)?.SetDutyCycle(0);
-        } 
-        [CapabilityAction]
-        public Task Pwm(int port, float dutyCycle, float cyclesPerSecond)
+            var payload = actionRequest.GetPayloadAs<ConnectedRelayPortPayload>();
+            return Get(payload.Port)?.SetDutyCycle(0);
+        }
+
+        public class ConnectedRelayPwmPayload
         {
-            var relay = Get(port);
-            relay.PwmPeriod = TimeSpan.FromSeconds(1 / cyclesPerSecond);
-            return Get(port)?.SetDutyCycle(dutyCycle);
-        } 
+            public int Port { get; set; } 
+            public float DutyCycle { get; set; }
+            public float CyclesPerSecond { get; set; }
+        }
+        
+        public Task Pwm(DeviceCapabilityActionRequest actionRequest)
+        {
+            var payload = actionRequest.GetPayloadAs<ConnectedRelayPwmPayload>();
+            var relay = Get(payload.Port);
+            if (relay == null)
+                return Task.CompletedTask;
+            
+            relay.PwmPeriod = TimeSpan.FromSeconds(1 / payload.CyclesPerSecond);
+            
+            return relay.SetDutyCycle(payload.DutyCycle);
+        }
+
+        public Task<object> Invoke(JsonElement request)
+        {
+        }
     }
 }

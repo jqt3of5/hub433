@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Node.Abstractions
 {
     public class CapabilityDescriber
     {
-        public record DeviceCapabilityDescriptor (string CapabilityType, string CapabilityVersion,
+        public record DeviceCapabilityDescriptor (string CapabilityType,
             DeviceCapabilityDescriptor.PropertyDescriptor[] Properties,
             DeviceCapabilityDescriptor.ActionDescriptor[] Actions)
         {
@@ -76,7 +76,7 @@ namespace Node.Abstractions
             //TODO: Register events
 
             var capabilityAttribute = capability.GetType().GetCustomAttribute(typeof(CapabilityAttribute)) as CapabilityAttribute;
-            return new DeviceCapabilityDescriptor(capabilityAttribute?.Name ?? capability.GetType().Name, capabilityAttribute?.Version ?? "0.0.0", values.ToArray(), actions.ToArray()); 
+            return new DeviceCapabilityDescriptor(capabilityAttribute?.Name ?? capability.GetType().Name, values.ToArray(), actions.ToArray()); 
         }
     }
 
@@ -87,14 +87,11 @@ namespace Node.Abstractions
     public sealed class CapabilityAttribute : Attribute
     {
         public readonly string Name;
-        public readonly string Version;
-
         // See the attribute guidelines at 
         //  http://go.microsoft.com/fwlink/?LinkId=85236
-        public CapabilityAttribute(string name, string version)
+        public CapabilityAttribute(string name)
         {
             Name = name;
-            Version = version;
         }
     } 
     
@@ -105,10 +102,13 @@ namespace Node.Abstractions
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
     public sealed class CapabilityActionAttribute : Attribute
     {
+        private readonly Type _payloadType;
+
         // See the attribute guidelines at 
         //  http://go.microsoft.com/fwlink/?LinkId=85236
-        public CapabilityActionAttribute()
+        public CapabilityActionAttribute(Type payloadType)
         {
+            _payloadType = payloadType;
         }
     }
     

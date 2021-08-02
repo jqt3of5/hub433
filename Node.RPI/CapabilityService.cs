@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Node.Abstractions;
 using Node.Hardware.Peripherals;
@@ -17,7 +18,7 @@ namespace RPINode
         private readonly Receiver433 _receiver433;
         private readonly DhtCore _dht;
 
-        private List<(string Version, string Name, ICapability capability)> _capabilities= new();
+        private List<(string Name, ICapability capability)> _capabilities= new();
         public CapabilityService(IGpioController pins)
         {
             //Create Connected Peripheral Instances
@@ -41,41 +42,51 @@ namespace RPINode
                 return false;
             }
 
-            _capabilities.Add((attribute.Version, attribute.Name, capability));
+            _capabilities.Add((attribute.Name, capability));
             return true;
         }
 
-        public async Task<object?> InvokeCapability(DeviceCapabilityRequest request)
+        public async Task<object?> InvokeCapabilityAction(DeviceCapabilityActionRequest request)
         {
-            //First find the matching capabilty/version
-            foreach (var capability in _capabilities)
+            var capability = _capabilities.FirstOrDefault(cap=> cap.Name == request.CapabilityType);
+            if (capability == default)
             {
-                //TODO: Support "latest" version name. (version selectors too maybe?)
-                if (capability.Version == request.CapabilityVersion && capability.Name == request.CapabilityType)
+                return null;
+            }
+            
+            //Next find the method to perform the action
+            var methodInfo = capability.capability.GetType().GetMethod(request.CapabilityAction);
+            if (methodInfo != null)
+            {
+                //Create the capability handler
+                var result = methodInfo.Invoke(capability.capability, new object?[] {request});
+                
+                if (result is Task<object?> taskReturn)
                 {
-                    //Next find the method to perform the action
-                    var methodInfo = capability.capability.GetType().GetMethod(request.CapabilityAction);
-                    if (methodInfo != null)
-                    {
-                        //Create the capability handler
-                        var result = InvokeWithMappedParameters(request.arguments, methodInfo, capability);
-                
-                        if (result is Task<object?> taskReturn)
-                        {
-                            return await taskReturn;
-                        }
-                        if (result is Task task)
-                        {
-                            await task;
-                            return Task.FromResult<object?>(null);
-                        }
-                
-                        return Task.FromResult(result);  
-                    }
+                    return await taskReturn;
                 }
+                if (result is Task task)
+                {
+                    await task;
+                    return Task.FromResult<object?>(null);
+                }
+        
+                return Task.FromResult(result);  
             }
 
             return Task.FromResult<object?>(null);
+        }
+        public async Task<object?> InvokeCapability(string capabilityName, JsonElement actionRequest)
+        {
+            //First find the matching capabilty
+            var capability = _capabilities.FirstOrDefault(cap=> cap.Name == capabilityName);
+            if (capability == default)
+            {
+                return null;
+            }
+
+            //TODO: it would technically be possible to deserialize the payload as a specific type and pass that as an argument instead of the whole request
+            return await capability.capability.Invoke(actionRequest);
         }
         
         private object? InvokeWithMappedParameters(string [] stringArguments, MethodInfo method, object instance)

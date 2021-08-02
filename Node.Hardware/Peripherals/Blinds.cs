@@ -27,7 +27,7 @@ namespace Node.Hardware.Peripherals
 
        public enum BlindsChannel
        {
-           Channel1,
+           Channel1 = 1,
            Channel2,
            Channel3,
            Channel4,

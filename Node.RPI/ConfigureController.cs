@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using mqtt.Notification;
-using Newtonsoft.Json;
 using Node.Abstractions;
 
 namespace RPINode
@@ -23,7 +23,7 @@ namespace RPINode
         [Route("claim")]
         public async Task<IActionResult> Claim([FromBody]ClaimDeviceRequest config)
         {
-            await _service.Publish($"thing/{_service.ThingName}/claim", JsonConvert.SerializeObject(config));
+            await _service.Publish($"thing/{_service.ThingName}/claim", JsonSerializer.Serialize(config));
             return Ok();
         } 
     }
