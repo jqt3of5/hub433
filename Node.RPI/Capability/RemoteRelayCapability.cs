@@ -55,8 +55,37 @@ namespace RPINode.Capability
             return new RemoteRelay(_transmitter433).Pwm(payload.Channel, payload.Values);
         }
 
-        public Task<object> Invoke(JsonElement request)
+        public struct RemoteRelayState
         {
+            public ConnectedRelayCapability.RelayPwmState? Channel1 { get; set; }
+            public ConnectedRelayCapability.RelayPwmState? Channel2 { get; set; }
+            public ConnectedRelayCapability.RelayPwmState? Channel3 { get; set; }
+            public ConnectedRelayCapability.RelayPwmState? Channel4 { get; set; }
+            public ConnectedRelayCapability.RelayPwmState? Channel5 { get; set; }
+            public ConnectedRelayCapability.RelayPwmState? Channel6 { get; set; }
+
+            public ConnectedRelayCapability.RelayPwmState? [] Channels()
+            {
+                return new[] {Channel1, Channel2, Channel3, Channel4, Channel5, Channel6};
+            }
+            
+        }
+        public async Task<object> Invoke(JsonElement request)
+        {
+            //TODO: I want the object structure in the shadow to follow this pattern - but it does make for some awkward code in this method
+            var state = JsonSerializer.Deserialize<RemoteRelayState>(request.GetRawText());
+
+            var relay = new RemoteRelay(_transmitter433);
+
+            for (int i = 0; i < state.Channels().Length; ++i)
+            {
+                if (state.Channels()[i] is { } channel)
+                {
+                    await relay.Pwm(i, channel.Ports().Where(port => port != null).Select((port, j) => (j, port.Value.DutyCycle, port.Value.CyclesPerSecond)).ToArray());
+                }
+            }
+
+            return null;
         }
     }
 }
