@@ -8,7 +8,7 @@ namespace Node.Abstractions
 {
     public interface ICapability
     {
-        Task<object> Invoke(JsonElement request);
+        Task<object> UpdateState(JsonElement capabilityState);
         
     }
     

@@ -24,9 +24,10 @@ namespace RPINode.Capability
         }
         
         [CapabilityAction(typeof(PairPayload))]
-        public Task Pair(Blinds.BlindsChannel channel)
+        public Task Pair(DeviceCapabilityActionRequest actionRequest)
         {
-            return new Blinds(_transmitter433).Pair(channel);
+            var payload = actionRequest.GetPayloadAs<ChannelCommandPayload>();
+            return new Blinds(_transmitter433).Pair(payload.Channel);
         }
 
         public class ChannelCommandPayload
@@ -51,38 +52,51 @@ namespace RPINode.Capability
             return new Blinds(_transmitter433).Broadcast(payload.Channel, Blinds.BlindsCommand.Down);
         }
 
-        public class BlindsStatePayload
+        public struct BlindsStatePayload
         {
-            public Dictionary<Blinds.BlindsChannel, ChannelState> channels { get; set; }
+            public ChannelState? channel1 { get; set; }
+            public ChannelState? channel2 { get; set; }
+            public ChannelState? channel3 { get; set; }
+            public ChannelState? channel4 { get; set; }
+            public ChannelState? channel5 { get; set; }
+            public ChannelState? channel6 { get; set; }
 
-            public class ChannelState
+            public (Blinds.BlindsChannel, ChannelState?)[] Channels() => new[] {
+                (Blinds.BlindsChannel.Channel1, channel1),
+                (Blinds.BlindsChannel.Channel1, channel1), 
+                (Blinds.BlindsChannel.Channel1, channel1), 
+                (Blinds.BlindsChannel.Channel1, channel1), 
+                (Blinds.BlindsChannel.Channel1, channel1), 
+                (Blinds.BlindsChannel.Channel1, channel1)
+            };
+            
+            
+            public struct ChannelState
             {
-                public enum BlindsState
-                {
-                    Open, 
-                    Closed
-                }
-                public BlindsState state { get; set; } 
+                public float percentage { get; set; }
             }
         }
-        public async Task<object> Invoke(JsonElement request)
+        public async Task<object> UpdateState(JsonElement request)
         {
-            var payload = JsonSerializer.Deserialize<BlindsStatePayload>(request.GetRawText());
-
+            var state = JsonSerializer.Deserialize<BlindsStatePayload>(request.GetRawText());
             var blinds = new Blinds(_transmitter433);
-            foreach (var channelState in payload.channels)
+
+            for (int i = 0; i < state.Channels().Length; ++i)
             {
-                switch (channelState.Value.state)
+                var (channel, channelState) = state.Channels()[i];
+                
+                if (channelState is {} cs)
                 {
-                   case BlindsStatePayload.ChannelState.BlindsState.Closed:
-                       await blinds.Broadcast(channelState.Key, Blinds.BlindsCommand.Close);
-                       break;
-                   case BlindsStatePayload.ChannelState.BlindsState.Open:
-                       await blinds.Broadcast(channelState.Key, Blinds.BlindsCommand.Close);
-                       break;
+                    if (cs.percentage > .50)
+                    {
+                       await blinds.Broadcast(channel, Blinds.BlindsCommand.Close);
+                    }
+                    else
+                    {
+                       await blinds.Broadcast(channel, Blinds.BlindsCommand.Open);
+                    }
                 }
             }
-
             return null;
         }
     }

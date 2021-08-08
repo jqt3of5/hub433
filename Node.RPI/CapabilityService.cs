@@ -76,7 +76,7 @@ namespace RPINode
 
             return Task.FromResult<object?>(null);
         }
-        public async Task<object?> InvokeCapability(string capabilityName, JsonElement actionRequest)
+        public async Task<object?> UpdateCapabilityState(string capabilityName, JsonElement capabilityState)
         {
             //First find the matching capabilty
             var capability = _capabilities.FirstOrDefault(cap=> cap.Name == capabilityName);
@@ -86,7 +86,7 @@ namespace RPINode
             }
 
             //TODO: it would technically be possible to deserialize the payload as a specific type and pass that as an argument instead of the whole request
-            return await capability.capability.Invoke(actionRequest);
+            return await capability.capability.UpdateState(capabilityState);
         }
         
         private object? InvokeWithMappedParameters(string [] stringArguments, MethodInfo method, object instance)

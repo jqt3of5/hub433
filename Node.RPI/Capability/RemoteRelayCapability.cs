@@ -68,9 +68,8 @@ namespace RPINode.Capability
             {
                 return new[] {Channel1, Channel2, Channel3, Channel4, Channel5, Channel6};
             }
-            
         }
-        public async Task<object> Invoke(JsonElement request)
+        public async Task<object> UpdateState(JsonElement request)
         {
             //TODO: I want the object structure in the shadow to follow this pattern - but it does make for some awkward code in this method
             var state = JsonSerializer.Deserialize<RemoteRelayState>(request.GetRawText());
@@ -81,7 +80,10 @@ namespace RPINode.Capability
             {
                 if (state.Channels()[i] is { } channel)
                 {
-                    await relay.Pwm(i, channel.Ports().Where(port => port != null).Select((port, j) => (j, port.Value.DutyCycle, port.Value.CyclesPerSecond)).ToArray());
+                    //Remote relays are sent the whole list states for the ports at once.  
+                    var portValues = channel.Ports().Where(port => port != null).Select((port, j) =>
+                        (j, port.Value.DutyCycle, port.Value.CyclesPerSecond)).ToArray();
+                    await relay.Pwm(i, portValues);
                 }
             }
 

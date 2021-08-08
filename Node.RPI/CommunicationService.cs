@@ -198,7 +198,7 @@ namespace RPINode
             
             foreach (var request in doc.state.desired.capabilities)
             {
-                await _capabilityService.InvokeCapability(request.Key, request.Value);
+                await _capabilityService.UpdateCapabilityState(request.Key, request.Value);
             }
             
             doc.version = null;
@@ -231,7 +231,7 @@ namespace RPINode
             // }
             foreach (var request in delta.state.capabilities)
             {
-                await _capabilityService.InvokeCapability(request.Key, request.Value);
+                await _capabilityService.UpdateCapabilityState(request.Key, request.Value);
             }
 
             //Our state should be updated by now, publish back to aws
