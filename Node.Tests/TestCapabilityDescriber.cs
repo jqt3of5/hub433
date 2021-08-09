@@ -12,7 +12,7 @@ namespace Node.Tests
     [TestFixture]
     public class TestCapabilityDescriber
     {
-        [Capability(nameof(IPropertyMockCapability), "1.0.0")]
+        [Capability(nameof(IPropertyMockCapability))]
         public interface IPropertyMockCapability : ICapability
         {
             [Value]
@@ -20,7 +20,7 @@ namespace Node.Tests
             [Value]
             public int PropertyInt{ get; }
         }
-        [Capability(nameof(IMixedMockCapability), "1.0.0")]
+        [Capability(nameof(IMixedMockCapability))]
         public interface IMixedMockCapability : ICapability
         {
             [CapabilityAction]
@@ -35,7 +35,7 @@ namespace Node.Tests
             [Value]
             public int PropertyInt{ get; }
         }
-        [Capability(nameof(IActionMockCapability), "1.0.0")]
+        [Capability(nameof(IActionMockCapability))]
         public interface IActionMockCapability : ICapability
         {
             [CapabilityAction]
@@ -51,25 +51,25 @@ namespace Node.Tests
             [CapabilityAction]
             public string FuncMixed(string a, int b);
         }
-        [Capability(nameof(IActionAMockCapability), "1.0.0")]
+        [Capability(nameof(IActionAMockCapability))]
         public interface IActionAMockCapability : ICapability
         {
             [CapabilityAction]
             void Foo();
         }
-        [Capability(nameof(IActionBMockCapability), "1.0.0")]
+        [Capability(nameof(IActionBMockCapability))]
         public interface IActionBMockCapability : ICapability
         {
             [CapabilityAction]
             string Foo();
         }
-        [Capability(nameof(IActionCMockCapability), "1.0.0")]
+        [Capability(nameof(IActionCMockCapability))]
         public interface IActionCMockCapability : ICapability
         {
             [CapabilityAction]
             void Foo(string a);
         } 
-        [Capability(nameof(IActionDMockCapability), "1.0.0")]
+        [Capability(nameof(IActionDMockCapability))]
         public interface IActionDMockCapability : ICapability
         {
             [CapabilityAction]
@@ -82,7 +82,6 @@ namespace Node.Tests
             var descriptor = CapabilityDescriber.Describe(capability.Object);
 
             Assert.That(descriptor.CapabilityType, Is.Not.Empty);
-            Assert.That(descriptor.CapabilityVersion, Is.EqualTo("0.0.0"));
             Assert.That(descriptor.Actions, Is.Empty);
             Assert.That(descriptor.Properties, Is.Empty);
         }
@@ -93,7 +92,6 @@ namespace Node.Tests
             var descriptor = CapabilityDescriber.Describe(capability.Object);
             
             Assert.That(descriptor.CapabilityType, Is.EqualTo(nameof(IActionMockCapability)));
-            Assert.That(descriptor.CapabilityVersion, Is.EqualTo("1.0.0"));
         } 
         [Test]
         public void TestActionCapabilityDescriber()

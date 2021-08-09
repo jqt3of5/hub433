@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Node.Abstractions;
 using Node.Hardware.Peripherals;
 using Unosquare.PiGpio;
 using Unosquare.PiGpio.NativeEnums;
@@ -16,15 +17,18 @@ namespace Node.Tests.Console
     {
         static async Task Main(string[] args)
         {
-            Pi.Init<BootstrapPiGpio>();
-            
+            // Pi.Init<BootstrapPiGpio>();
+            Pi.Init<BootstrapMock>(); 
             var pin = Pi.Gpio[BcmPin.Gpio17];
             var transmitter = new Transmitter433(pin);
-            var blinds = new Blinds(transmitter);
-
-            await blinds.Broadcast(Blinds.BlindsChannel.Channel1, Blinds.BlindsCommand.Open);
+            var relay = new RemoteRelay(transmitter);
+            await relay.On(0, new[] {0, 1, 2, 3});
+            
+            await Task.Delay(500);
+            
+            await relay.Off(0, new[] {0, 1, 2, 3});
            
-            Setup.GpioTerminate();
+            // Setup.GpioTerminate();
         }
     }
 }

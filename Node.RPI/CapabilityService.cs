@@ -88,30 +88,5 @@ namespace RPINode
             //TODO: it would technically be possible to deserialize the payload as a specific type and pass that as an argument instead of the whole request
             return await capability.capability.UpdateState(capabilityState);
         }
-        
-        private object? InvokeWithMappedParameters(string [] stringArguments, MethodInfo method, object instance)
-        {
-            //TODO: This can be improved in a couple of ways....
-            //since this is deserializing as a string array, each element must be a string in the JSON. Then we type convert later
-            //If we deserialized as an object array, we would get JsonElements, which we can then convert/type check into the method parameters. 
-            //allowing a bit more flexibility in the JSON format
-            //OR we can convert to a dictionary and mapped named parameters.  
-            var parameters = method.GetParameters();
-            if (parameters.Length > stringArguments.Length)
-            {
-                //we cannot invoke the method if we don't have enough arguments
-                return null;
-            }
-
-            List<object> arguments = new();
-            for (int i = 0; i < parameters.Length; ++i)
-            {
-                var argument = TypeDescriptor.GetConverter(parameters[i].ParameterType).ConvertFromString(stringArguments[i]);
-                arguments.Add(argument);
-            }
-
-            return method.Invoke(instance, arguments.ToArray());
-        }
-
     }
 }

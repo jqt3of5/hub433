@@ -39,16 +39,21 @@ namespace RPINode.Capability
             return new RemoteRelay(_transmitter433).Pair(payload.Channel);
         }
         
+        [CapabilityAction(typeof(OnOffPayload))]
         public Task On(DeviceCapabilityActionRequest actionRequest)
         {
             var payload = actionRequest.GetPayloadAs<OnOffPayload>();
             return new RemoteRelay(_transmitter433).On(payload.Channel, payload.Ports);
         }  
+        
+        [CapabilityAction(typeof(OnOffPayload))]
         public Task Off(DeviceCapabilityActionRequest actionRequest)
         {
             var payload = actionRequest.GetPayloadAs<OnOffPayload>();
             return new RemoteRelay(_transmitter433).Off(payload.Channel, payload.Ports);
         }
+        
+        [CapabilityAction(typeof(PwmPayload))]
         public Task Pwm(DeviceCapabilityActionRequest actionRequest)
         {
             var payload = actionRequest.GetPayloadAs<PwmPayload>();

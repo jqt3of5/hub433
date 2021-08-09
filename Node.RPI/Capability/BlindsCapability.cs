@@ -63,11 +63,11 @@ namespace RPINode.Capability
 
             public (Blinds.BlindsChannel, ChannelState?)[] Channels() => new[] {
                 (Blinds.BlindsChannel.Channel1, channel1),
-                (Blinds.BlindsChannel.Channel1, channel1), 
-                (Blinds.BlindsChannel.Channel1, channel1), 
-                (Blinds.BlindsChannel.Channel1, channel1), 
-                (Blinds.BlindsChannel.Channel1, channel1), 
-                (Blinds.BlindsChannel.Channel1, channel1)
+                (Blinds.BlindsChannel.Channel2, channel2), 
+                (Blinds.BlindsChannel.Channel3, channel3), 
+                (Blinds.BlindsChannel.Channel4, channel4), 
+                (Blinds.BlindsChannel.Channel5, channel5), 
+                (Blinds.BlindsChannel.Channel6, channel6)
             };
             
             

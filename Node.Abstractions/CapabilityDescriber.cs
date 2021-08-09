@@ -110,6 +110,9 @@ namespace Node.Abstractions
         {
             _payloadType = payloadType;
         }
+        public CapabilityActionAttribute()
+        {
+        }
     }
     
     [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]

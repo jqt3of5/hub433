@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -65,13 +66,16 @@ namespace Node.Hardware.Peripherals
            };
 
            var bits = preamble + chBits.channel + cmdBits.cmd + chBits.crc + cmdBits.crc + "1";
-
+#if DEBUG
+           Console.Write(bits);
+#endif
            var message = ToRawMessage(bits);
            await _transmitter433.Transmit(message);
        }
 
        private RadioSymbol [] ToRawMessage(string bits)
        {
+           //TODO: Update to use new ToSymbols() method and use bits instead of strings
            var data = bits.SelectMany(bit => 
                bit == '1' ? 
                    new [] {new RadioSymbol(725, true), new RadioSymbol(350, false)} : 
