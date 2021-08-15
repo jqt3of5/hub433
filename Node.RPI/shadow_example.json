@@ -1,0 +1,16 @@
+﻿{
+  "state": {
+    "desired": {
+      "connected": true,
+      
+      "capabilities": {
+        "Blinds": {
+          "channel1": {
+            "percentage": 1.0
+          }
+        } 
+      }
+      
+    }
+  }
+}

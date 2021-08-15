@@ -117,8 +117,8 @@ namespace RPINode
             public string clientMode { get; set; }
             public string region { get; set; }
             public string [] services { get; set; } 
-            
         }
+        
         public class ShadowState
         {
             public string? version { get; set; }
@@ -217,18 +217,7 @@ namespace RPINode
         private async Task HandleShadowDelta(MqttClientService.NotificationMessage message)
         {
             var delta = message.GetPayload<ShadowDelta>();
-            
-            //TODO: The delta will only include the property that was actually changed. 
-            //TODO: We might want to adjust the shadow json to be:
-            // {
-            //   "<capabilityType>" : {
-            //    "<channel>": {
-            //     "<port>": {
-            //      "State": "Open",
-            //      "Payload": {}
-            //     }
-            //   }
-            // }
+           
             foreach (var request in delta.state.capabilities)
             {
                 await _capabilityService.UpdateCapabilityState(request.Key, request.Value);
