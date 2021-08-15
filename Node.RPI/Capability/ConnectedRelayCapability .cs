@@ -6,7 +6,7 @@ using Node.Hardware.Peripherals;
 
 namespace RPINode.Capability
 {
-    [Capability("Relay")]
+    [Capability("Relay", typeof(RelayPwmState))]
     public class ConnectedRelayCapability : ICapability
     {
         private readonly Relay[] _relays;
@@ -62,18 +62,21 @@ namespace RPINode.Capability
             public float CyclesPerSecond { get; set; }
         }
 
+        [CapabilityAction(typeof(ConnectedRelayPortPayload))]
         public Task On(DeviceCapabilityActionRequest actionRequest)
         {
             var payload = actionRequest.GetPayloadAs<ConnectedRelayPortPayload>();
             return Get(payload.Port)?.SetDutyCycle(1);
         }  
         
+        [CapabilityAction(typeof(ConnectedRelayPortPayload))]
         public Task Off(DeviceCapabilityActionRequest actionRequest)
         {
             var payload = actionRequest.GetPayloadAs<ConnectedRelayPortPayload>();
             return Get(payload.Port)?.SetDutyCycle(0);
         }
  
+        [CapabilityAction(typeof(ConnectedRelayPortPayload))]
         public Task Pwm(DeviceCapabilityActionRequest actionRequest)
         {
             var payload = actionRequest.GetPayloadAs<ConnectedRelayPwmPayload>();
@@ -88,7 +91,6 @@ namespace RPINode.Capability
 
         public async Task<object> UpdateState(JsonElement request)
         {
-            //TODO: I want the object structure in the shadow to follow this pattern - but it does make for some awkward code in this method
             var state = JsonSerializer.Deserialize<RelayPwmState>(request.GetRawText());
 
             for (int i = 0; i < state.Ports().Length; ++i)

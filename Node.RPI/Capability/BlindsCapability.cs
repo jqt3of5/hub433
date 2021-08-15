@@ -8,7 +8,7 @@ using Node.Hardware.Peripherals;
 
 namespace RPINode.Capability
 {
-    [Capability("Blinds")]
+    [Capability("Blinds", typeof(BlindsStatePayload))]
     public class BlindsCapability : ICapability
     {
         private readonly Transmitter433 _transmitter433;
@@ -76,6 +76,8 @@ namespace RPINode.Capability
                 public float percentage { get; set; }
             }
         }
+        
+        
         public async Task<object> UpdateState(JsonElement request)
         {
             var state = JsonSerializer.Deserialize<BlindsStatePayload>(request.GetRawText());

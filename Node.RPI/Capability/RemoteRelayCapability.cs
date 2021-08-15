@@ -7,7 +7,7 @@ using Node.Hardware.Peripherals;
 
 namespace RPINode.Capability
 {
-    [Capability("RemoteRelay")]
+    [Capability("RemoteRelay", typeof(RemoteRelayState))]
     public class RemoteRelayCapability : ICapability
     {
         private readonly Transmitter433 _transmitter433;
