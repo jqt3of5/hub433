@@ -36,6 +36,7 @@ namespace RPINode.Capability
         public Task Pair(DeviceCapabilityActionRequest actionRequest)
         {
             var payload = actionRequest.GetPayloadAs<PairPayload>();
+            Logger.Log($"Pairing Relay on channel: {payload.Channel}");
             return new RemoteRelay(_transmitter433).Pair(payload.Channel);
         }
         
@@ -76,7 +77,6 @@ namespace RPINode.Capability
         }
         public async Task<object> UpdateState(JsonElement request)
         {
-            //TODO: I want the object structure in the shadow to follow this pattern - but it does make for some awkward code in this method
             var state = JsonSerializer.Deserialize<RemoteRelayState>(request.GetRawText());
 
             var relay = new RemoteRelay(_transmitter433);
@@ -85,9 +85,14 @@ namespace RPINode.Capability
             {
                 if (state.Channels()[i] is { } channel)
                 {
-                    //Remote relays are sent the whole list states for the ports at once.  
-                    var portValues = channel.Ports().Where(port => port != null).Select((port, j) =>
-                        (j, port.Value.DutyCycle, port.Value.CyclesPerSecond)).ToArray();
+                    //Remote relays are sent the whole list of states for each the ports at once.  
+                    var portValues = channel
+                        .Ports()
+                        .Where(port => port != null)
+                        .Select((port, j) => (j, port.Value.DutyCycle, port.Value.CyclesPerSecond))
+                        .ToArray();
+                    
+                    Logger.Log($"Setting Remote Relay on Channel: {channel}"); 
                     await relay.Pwm(i, portValues);
                 }
             }

@@ -99,6 +99,7 @@ namespace RPINode.Capability
                 {
                     if (_relays.Length > i)
                     {
+                        Logger.Log($"Setting Relay on Port: {i} to {port.DutyCycle}");
                         await _relays[i].SetDutyCycle(port.DutyCycle);
                     }
                 }

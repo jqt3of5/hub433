@@ -67,7 +67,7 @@ namespace RPINode
             
             await _mqttClientService.Subscribe(
                 $"$aws/things/{_mqttClientService.ThingName}/shadow/update/documents",
-                HandleCapabilityRequest);
+                HandleShadowDocument);
 
             await _mqttClientService.Subscribe(
                 $"$aws/things/{_mqttClientService.ThingName}/shadow/get/accepted", 
@@ -172,11 +172,13 @@ namespace RPINode
                 return;
             }
             
+            Logger.Log("Attempting to start tunnel");
             // Start the destination local proxy in a separate process to connect to the SSH Daemon listening port 22
             //final ProcessBuilder pb = new ProcessBuilder("localproxy",
             //    "-t", accessToken,
             //    "-r", region,
             //    "-d", "localhost:22"); 
+            Logger.Log("Starting Tunnel failed - not implemented");
 
         }
         /// <summary>
@@ -193,11 +195,13 @@ namespace RPINode
 
             if (doc?.state?.desired?.capabilities == null)
             {
+                Logger.Log("No capabilities to update in HandleGetShadow");
                 return;
             }
             
             foreach (var request in doc.state.desired.capabilities)
             {
+                Logger.Log($"Updating capability state: {request.Key} with body: \n {request.Value.GetRawText()}");
                 await _capabilityService.UpdateCapabilityState(request.Key, request.Value);
             }
             
@@ -220,6 +224,7 @@ namespace RPINode
            
             foreach (var request in delta.state.capabilities)
             {
+                Logger.Log($"Updating capability state: {request.Key} with body: \n {request.Value.GetRawText()}");
                 await _capabilityService.UpdateCapabilityState(request.Key, request.Value);
             }
 
@@ -250,6 +255,7 @@ namespace RPINode
             try
             {
                 var capabilityRequest = message.GetPayload<DeviceCapabilityActionRequest>();
+                Logger.Log($"Invoking capability action: {capabilityRequest.CapabilityType}.{capabilityRequest.CapabilityAction}");
                 var response = await _capabilityService.InvokeCapabilityAction(capabilityRequest);
                 
                 if (!string.IsNullOrEmpty(message.InternalMessage.ResponseTopic))
@@ -260,6 +266,7 @@ namespace RPINode
             }
             catch (Exception e)
             {
+                Logger.Log(e);
                 await _mqttClientService.Publish($"error/{_mqttClientService.ThingName}", e.ToString());
             } 
         }

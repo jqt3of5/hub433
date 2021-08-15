@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using RPINode;
 
 namespace Node.Hardware.Peripherals
 {
@@ -67,7 +68,7 @@ namespace Node.Hardware.Peripherals
 
            var bits = preamble + chBits.channel + cmdBits.cmd + chBits.crc + cmdBits.crc + "1";
 #if DEBUG
-           Console.Write(bits);
+           Logger.Log($"Transmitting bits: {bits}");
 #endif
            var message = ToRawMessage(bits);
            await _transmitter433.Transmit(message);
