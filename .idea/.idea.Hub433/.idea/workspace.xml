@@ -8,9 +8,10 @@
     <projectFile>AWSService/AWSService.csproj</projectFile>
     <projectFile>WorkerService/WorkerService.csproj</projectFile>
     <projectFile>ConsoleClient/ConsoleClient.csproj</projectFile>
+    <projectFile>Sampler433/Sampler433.csproj</projectFile>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec4ed5fc-664c-4e8d-bee4-d8dfab8e9cc5" name="Default Changelist" comment="">
+    <list default="true" id="ec4ed5fc-664c-4e8d-bee4-d8dfab8e9cc5" name="Default Changelist" comment="Instead of instantiating the objects dynamically, create them ahead of time.">
       <change afterPath="$PROJECT_DIR$/Hub433Backend/.aws-sam/build.toml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Hub433Backend/.aws-sam/build/GenerateClaimCodeFunction/Amazon.Lambda.APIGatewayEvents.dll" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Hub433Backend/.aws-sam/build/GenerateClaimCodeFunction/Amazon.Lambda.Core.dll" afterDir="false" />
@@ -23,17 +24,9 @@
       <change afterPath="$PROJECT_DIR$/Hub433Backend/src/HelloWorld/Function.cs" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Hub433Backend/src/HelloWorld/HelloWorld.csproj" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Hub433Backend/src/HelloWorld/aws-lambda-tools-defaults.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/dataSources.local.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/indexLayout.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ConsoleClient/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ConsoleClient/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Hub433Backend/Hub433Backend.Tests/ClaimCodeTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Hub433Backend/Hub433Backend.Tests/ClaimCodeTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/ClaimDevice.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/ClaimDevice.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/GenerateClaimCode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/GenerateClaimCode.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Mqtt.Extensions/Notification/MqttClientService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Mqtt.Extensions/Notification/MqttClientService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Node.Abstractions/ClaimCodeRequest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Node.Abstractions/ClaimCodeRequest.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Node.RPI/CommunicationService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Node.RPI/CommunicationService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Node.RPI/ConfigureController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Node.RPI/ConfigureController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Hub433.sln" beforeDir="false" afterPath="$PROJECT_DIR$/Hub433.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Node.Hardware/Peripherals/Receiver433.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Node.Hardware/Peripherals/Receiver433.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,6 +59,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/F9FB75FB-D1C4-4BD9-8CE2-C3B0390169EB/7/IGpioPin.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/D01EA799-E9C9-4F77-A043-C8ECB5387E2F/26/Select.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Hub433/Controllers/NodesController.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/E6E6B40B-308C-4FE1-9C93-7C26C144C865/1A2/ThreadPool.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Hub433/Busi/NodeRepo.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D7A3CA84-869F-48E0-AA5C-354EE22CB1EE/59/ee9c92b9/ILogger.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Hub433/Controllers/MqttHostedService.cs" root0="FORCE_HIGHLIGHTING" />
@@ -111,9 +105,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Hub433/NodeRepo.cs" />
-      <option value="$PROJECT_DIR$/Hub433/StatusController.cs" />
-      <option value="$PROJECT_DIR$/Hub433/NodeHub.cs" />
       <option value="$PROJECT_DIR$/Hub433/Controllers/StatusController.cs" />
       <option value="$PROJECT_DIR$/RPINode/Transmitter433.cs" />
       <option value="$PROJECT_DIR$/Hub433/Controllers/MqttController.cs" />
@@ -126,8 +117,6 @@
       <option value="$PROJECT_DIR$/RPINode/RadioService.cs" />
       <option value="$PROJECT_DIR$/Node.Hardware/Class1.cs" />
       <option value="$PROJECT_DIR$/Node.Tests/UnitTest1.cs" />
-      <option value="$PROJECT_DIR$/Node.Hardware/Peripherals/Transmitter433.cs" />
-      <option value="$PROJECT_DIR$/Node.Hardware/Peripherals/Receiver433.cs" />
       <option value="$PROJECT_DIR$/Node.Tests/TestTransmitter.cs" />
       <option value="$PROJECT_DIR$/Node.Hardware/BootstrapPiGpio.cs" />
       <option value="$PROJECT_DIR$/Node.Tests.Console/Program.cs" />
@@ -148,7 +137,6 @@
       <option value="$PROJECT_DIR$/Node.Hardware/Peripherals/RemoteRelay.cs" />
       <option value="$PROJECT_DIR$/Node.Hardware/Peripherals/BlindsCapability.cs" />
       <option value="$PROJECT_DIR$/Node.Hardware/Peripherals/RemoteRelayCapability.cs" />
-      <option value="$PROJECT_DIR$/Node.RPI/CapabilityService.cs" />
       <option value="$PROJECT_DIR$/Node.Abstractions/CapabilityDescriber.cs" />
       <option value="$PROJECT_DIR$/Node.Abstractions/DeviceCapabilityRequest.cs" />
       <option value="$PROJECT_DIR$/Node.Tests/TestCapabilityDescriber.cs" />
@@ -159,9 +147,15 @@
       <option value="$PROJECT_DIR$/Node.RPI/ConfigureDTO.cs" />
       <option value="$PROJECT_DIR$/Node.RPI/ClaimCodeRequest.cs" />
       <option value="$PROJECT_DIR$/Node.RPI/ConfigureController.cs" />
-      <option value="$PROJECT_DIR$/Node.RPI/CommunicationService.cs" />
       <option value="$PROJECT_DIR$/Mqtt.Extensions/Notification/MqttClientService.cs" />
       <option value="$PROJECT_DIR$/ConsoleClient/Program.cs" />
+      <option value="$PROJECT_DIR$/Node.RPI/Capability/ConnectedRelayCapability .cs" />
+      <option value="$PROJECT_DIR$/Node.Hardware/Peripherals/Transmitter433.cs" />
+      <option value="$PROJECT_DIR$/Node.RPI/appsettings.json" />
+      <option value="$PROJECT_DIR$/Node.RPI/CapabilityService.cs" />
+      <option value="$PROJECT_DIR$/Node.RPI/CommunicationService.cs" />
+      <option value="$PROJECT_DIR$/Sampler433/Program.cs" />
+      <option value="$PROJECT_DIR$/Node.Hardware/Peripherals/Receiver433.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1sIzUHKh5Fcrb6RGtVu4Fq36SBw" />
@@ -175,8 +169,8 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
-    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.34995976" />
-    <property name="DebuggerViewTab_PTCS_LastProportionKey" value="0.30008045" />
+    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.34994584" />
+    <property name="DebuggerViewTab_PTCS_LastProportionKey" value="0.0" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -189,7 +183,7 @@
     <property name="settings.editor.selected.configurable" value="reference.settings.deploy.options" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
-  <component name="RunManager" selected=".NET Project.ConsoleClient">
+  <component name="RunManager" selected=".NET Launch Settings Profile.RPINode">
     <configuration name="ConsoleClient" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="$PROJECT_DIR$/ConsoleClient/bin/Debug/net5.0/ConsoleClient.exe" />
       <option name="PROGRAM_PARAMETERS" value="shadow TestingThing --user jqt3of5" />
@@ -217,6 +211,24 @@
       <option name="USE_MONO" value="0" />
       <option name="RUNTIME_ARGUMENTS" value="" />
       <option name="PROJECT_PATH" value="$PROJECT_DIR$/Node.Tests.Console/Node.Tests.Console.csproj" />
+      <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
+      <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
+      <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
+      <option name="PROJECT_KIND" value="DotNetCore" />
+      <option name="PROJECT_TFM" value="" />
+      <method v="2">
+        <option name="Build" />
+      </method>
+    </configuration>
+    <configuration name="Sampler433" type="DotNetProject" factoryName=".NET Project">
+      <option name="EXE_PATH" value="" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="PROJECT_PATH" value="$PROJECT_DIR$/Sampler433/Sampler433.csproj" />
       <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
       <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
       <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
@@ -287,6 +299,7 @@
       <item itemvalue=".NET Project.ConsoleClient" />
       <item itemvalue="Publish to custom server.PublishTests" />
       <item itemvalue="Publish to custom server.Publish Console Tests" />
+      <item itemvalue=".NET Project.Sampler433" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -314,7 +327,9 @@
       <workItem from="1627230294910" duration="8074000" />
       <workItem from="1627619506587" duration="1399000" />
       <workItem from="1627661399827" duration="2160000" />
-      <workItem from="1627694406953" duration="5080000" />
+      <workItem from="1627694406953" duration="16342000" />
+      <workItem from="1628389629350" duration="9642000" />
+      <workItem from="1630118203609" duration="6264000" />
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <created>1620614873309</created>
@@ -428,7 +443,42 @@
       <option name="project" value="LOCAL" />
       <updated>1627266196950</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="ignore certificate files">
+      <created>1627789334717</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1627789334717</updated>
+    </task>
+    <task id="LOCAL-00018" summary="ignore certificate files">
+      <created>1627789351815</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1627789351815</updated>
+    </task>
+    <task id="LOCAL-00019" summary="ignore certificate files">
+      <created>1627790847340</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1627790847340</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Threadsafe transmitter">
+      <created>1627790870878</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1627790870878</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Instead of instantiating the objects dynamically, create them ahead of time.">
+      <created>1627790975745</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1627790975745</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -466,7 +516,10 @@
     <MESSAGE value="Fixing the certificates" />
     <MESSAGE value="commit so I can pull" />
     <MESSAGE value="Testing and improving the claimcode process" />
-    <option name="LAST_COMMIT_MESSAGE" value="Testing and improving the claimcode process" />
+    <MESSAGE value="ignore certificate files" />
+    <MESSAGE value="Threadsafe transmitter" />
+    <MESSAGE value="Instead of instantiating the objects dynamically, create them ahead of time." />
+    <option name="LAST_COMMIT_MESSAGE" value="Instead of instantiating the objects dynamically, create them ahead of time." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -580,6 +633,19 @@
           <line>403</line>
           <properties documentPath="C:\Users\jqt3o\AppData\Roaming\JetBrains\Rider2021.1\resharper-host\SourcesCache\754CC282-55E3-437B-9F4E-691658EB26A7\1B\MqttClient.cs" initialLine="403" containingFunctionPresentation="method 'SendAsync'" />
           <option name="timeStamp" value="53" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Node.RPI/Program.cs</url>
+          <line>56</line>
+          <properties documentPath="C:\Users\jqt3o\RiderProjects\hub433\Node.RPI\Program.cs" initialLine="56" containingFunctionPresentation="lambda expression inside method 'CreateHostBuilder'">
+            <startOffsets>
+              <option value="1918" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1999" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="55" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

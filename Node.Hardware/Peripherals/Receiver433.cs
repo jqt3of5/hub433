@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Unosquare.RaspberryIO.Abstractions;
 
@@ -17,18 +18,41 @@ namespace Node.Hardware.Peripherals
 
         public RadioSymbol[] Receive(TimeSpan timeout)
         {
-            List<TimeSpan> sampleIntervals = new List<TimeSpan>() {TimeSpan.Zero};
-            List<bool> samples = new List<bool>();
-            var startTime = DateTime.Now;
-            while (sampleIntervals.Last() < timeout)
+            List<bool> samples = new List<bool>(10000);
+            var sw = new Stopwatch();
+            var ticks = 0L;
+            while (sw.Elapsed < timeout)
             {
                 for (int i = 0; i < 100; ++i)
                 {
                     samples.Add(_pin.Value); 
+                    // ReSharper disable once EmptyEmbeddedStatement
+                    ticks = sw.ElapsedTicks + 9;
+                    while (sw.ElapsedTicks < ticks);
                 }
-                //Is this accurate enough to measure these reads? Difficult to say.  
-                sampleIntervals.Add(DateTime.Now - startTime);
             }
+
+            const int window = 5;
+            var history = new Queue<bool>();
+            bool? value = null;
+            for(var i = 0; i < samples.Count; ++i)
+            {
+                 history.Enqueue(samples[i]);
+                 if (history.Count < window)
+                     //Don't run the algorithm if our queue isn't full 
+                     continue;
+
+                 var v = lowPass(history.ToArray());
+                 if (v != value)
+                 {
+                     value = v;
+                 }
+                 
+                 history.Dequeue();
+            }
+
+            bool lowPass(IEnumerable<bool> samples) => samples.Sum( b => b ? 1.0 : 0.0 ) / samples.Count() > .5;
+            
             //TODO: Process the results and convert into radio symbols
             return new RadioSymbol[] { };
         }

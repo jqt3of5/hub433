@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'Sample SAM Template for HelloWorld
+
+  '
+Globals:
+  Function:
+    Timeout: 10
+Resources:
+  Hub433Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Test
+      Auth:
+        DefaultAuthorizer: Hub433UsersAuthorizer
+        Authorizers:
+          Hub433UsersAuthorizer:
+            UserPoolArn: arn:aws:cognito-idp:us-west-1:254414866354:userpool/us-west-1_g4JeVFuCV
+            Identity:
+              Header: Authorization
+  GenerateClaimCodeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: GenerateClaimCodeFunction
+      Handler: Hub433Backend::Hub433Backend.GenerateClaimCode::FunctionHandler
+      Runtime: dotnetcore3.1
+      Events:
+        Hub433Api:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: Hub433Api
+            Auth:
+              DefaultAuthorizer: Hub433UsersAuthorizer
+            Path: /thing/claimcode
+            Method: get
+  CreateThingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: CreateThingFunction
+      Handler: Hub433Backend::Hub433Backend.GenerateClaimCode::FunctionHandler
+      Runtime: dotnetcore3.1
+      Events:
+        Hub433Api:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: Hub433Api
+            Auth:
+              DefaultAuthorizer: Hub433UsersAuthorizer
+            Path: /thing/create
+            Method: get
+  ClaimDeviceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ClaimDeviceFunction
+      Handler: Hub433Backend::Hub433Backend.ClaimDevice::FunctionHandler
+      Runtime: dotnetcore3.1
+      Policies:
+      - AmazonDynamoDBFullAccess
+      Events:
+        Hub433Api:
+          Type: IoTRule
+          Properties:
+            Sql: SELECT *, topic(2) as ThingName FROM 'thing/+/claim'
+Outputs:
+  Hub433Api:
+    Description: API Gateway endpoint URL for Prod stage for Hello World function
+    Value:
+      Fn::Sub: https://${Hub433Api}.execute-api.${AWS::Region}.amazonaws.com/Test/hello/
+  GenerateClaimCodeFunction:
+    Description: Hello World Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - GenerateClaimCodeFunction
+      - Arn
+  ClaimDeviceFunction:
+    Description: Hello World Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - GenerateClaimCodeFunction
+      - Arn

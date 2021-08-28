@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mqtt.Extensions", "Mqtt.Ext
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleClient", "ConsoleClient\ConsoleClient.csproj", "{15BE3E4C-1975-4719-8517-FADC83ADD9AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sampler433", "Sampler433\Sampler433.csproj", "{7884FAC3-9273-456F-A697-39FD76CD099F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{15BE3E4C-1975-4719-8517-FADC83ADD9AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15BE3E4C-1975-4719-8517-FADC83ADD9AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15BE3E4C-1975-4719-8517-FADC83ADD9AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7884FAC3-9273-456F-A697-39FD76CD099F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7884FAC3-9273-456F-A697-39FD76CD099F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7884FAC3-9273-456F-A697-39FD76CD099F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7884FAC3-9273-456F-A697-39FD76CD099F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
