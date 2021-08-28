@@ -12,7 +12,7 @@ namespace Node.Tests
     [TestFixture]
     public class TestCapabilityDescriber
     {
-        [Capability(nameof(IPropertyMockCapability))]
+        [Capability(nameof(IPropertyMockCapability), typeof(object))]
         public interface IPropertyMockCapability : ICapability
         {
             [Value]
@@ -20,7 +20,7 @@ namespace Node.Tests
             [Value]
             public int PropertyInt{ get; }
         }
-        [Capability(nameof(IMixedMockCapability))]
+        [Capability(nameof(IMixedMockCapability), typeof(object))]
         public interface IMixedMockCapability : ICapability
         {
             [CapabilityAction]
@@ -35,7 +35,7 @@ namespace Node.Tests
             [Value]
             public int PropertyInt{ get; }
         }
-        [Capability(nameof(IActionMockCapability))]
+        [Capability(nameof(IActionMockCapability), typeof(object))]
         public interface IActionMockCapability : ICapability
         {
             [CapabilityAction]
@@ -51,25 +51,25 @@ namespace Node.Tests
             [CapabilityAction]
             public string FuncMixed(string a, int b);
         }
-        [Capability(nameof(IActionAMockCapability))]
+        [Capability(nameof(IActionAMockCapability), typeof(object))]
         public interface IActionAMockCapability : ICapability
         {
             [CapabilityAction]
             void Foo();
         }
-        [Capability(nameof(IActionBMockCapability))]
+        [Capability(nameof(IActionBMockCapability), typeof(object))]
         public interface IActionBMockCapability : ICapability
         {
             [CapabilityAction]
             string Foo();
         }
-        [Capability(nameof(IActionCMockCapability))]
+        [Capability(nameof(IActionCMockCapability), typeof(object))]
         public interface IActionCMockCapability : ICapability
         {
             [CapabilityAction]
             void Foo(string a);
         } 
-        [Capability(nameof(IActionDMockCapability))]
+        [Capability(nameof(IActionDMockCapability), typeof(object))]
         public interface IActionDMockCapability : ICapability
         {
             [CapabilityAction]

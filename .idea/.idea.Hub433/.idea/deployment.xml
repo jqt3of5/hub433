@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="tiltpi" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="tiltpi">
+        <serverdata>
+          <mappings>
+            <mapping local="$USER_HOME$/.nuget/packages/microsoft.net.test.sdk/16.5.0/build/netcoreapp2.1/Microsoft.NET.Test.Sdk.Program.cs" web="/" />
+            <mapping local="$USER_HOME$/.nuget/packages/microsoft.testplatform.testhost/16.5.0/build/netcoreapp2.1/x64/testhost.dll" web="/" />
+            <mapping local="$USER_HOME$/.nuget/packages/microsoft.testplatform.testhost/16.5.0/build/netcoreapp2.1/x64/testhost.exe" web="/" />
+            <mapping local="$USER_HOME$/.nuget/packages/nunit3testadapter/3.16.1/build/netcoreapp2.1/NUnit3.TestAdapter.dll" web="/" />
+            <mapping local="$USER_HOME$/.nuget/packages/nunit3testadapter/3.16.1/build/netcoreapp2.1/NUnit3.TestAdapter.pdb" web="/" />
+            <mapping local="$USER_HOME$/.nuget/packages/nunit3testadapter/3.16.1/build/netcoreapp2.1/nunit.engine.api.dll" web="/" />
+            <mapping local="$USER_HOME$/.nuget/packages/nunit3testadapter/3.16.1/build/netcoreapp2.1/nunit.engine.dll" web="/" />
+            <mapping local="$PROJECT_DIR$/ConsoleClient/ConsoleClient.csproj" web="/" />
+            <mapping local="$PROJECT_DIR$/ConsoleClient/Program.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/ConsoleClient/obj/Debug/net5.0/ConsoleClient.AssemblyInfo.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Hub433.sln" web="/" />
+            <mapping local="$PROJECT_DIR$/Mqtt.Extensions/Mqtt.Extensions.csproj" web="/" />
+            <mapping local="$PROJECT_DIR$/Mqtt.Extensions/Notification/MqttClientService.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Mqtt.Extensions/RouteTrie.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Mqtt.Extensions/obj/Debug/net5.0/Mqtt.Extensions.AssemblyInfo.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Abstractions/CapabilityDescriber.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Abstractions/ClaimCodeRequest.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Abstractions/Defaultable.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Abstractions/DeviceCapabilityActionRequest.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Abstractions/IsExternalInit.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Abstractions/MockController.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Abstractions/Node.Abstractions.csproj" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Abstractions/ThingCreatedResponse.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Abstractions/obj/Debug/netstandard2.1/Node.Abstractions.AssemblyInfo.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Hardware/BootstrapPiGpio.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Hardware/Node.Hardware.csproj" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Hardware/Peripherals/Blinds.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Hardware/Peripherals/DS18B20.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Hardware/Peripherals/DhtCore.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Hardware/Peripherals/Receiver433.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Hardware/Peripherals/Relay.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Hardware/Peripherals/RemoteRelay.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Hardware/Peripherals/Transmitter433.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Hardware/obj/Debug/net5.0/Node.Hardware.AssemblyInfo.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/Capability/BlindsCapability.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/Capability/ConnectedRelayCapability .cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/Capability/RemoteRelayCapability.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/CapabilityService.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/CommunicationService.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/ConfigureController.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/Logger.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/Node.RPI.csproj" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/Program.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/Properties/launchSettings.json" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/appsettings.Development.json" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/appsettings.RaspberryPi.json" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/certs/certificate.pem.crt" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/certs/private.pem.key" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/certs/public.pem.key" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/libpigpio.so" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/obj/Debug/net5.0/Node.RPI.AssemblyInfo.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.RPI/shadow_example.json" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Tests.Console/Node.Tests.Console.csproj" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Tests.Console/Program.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Tests.Console/obj/Debug/net5.0/Node.Tests.Console.AssemblyInfo.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Tests/Node.Tests.csproj" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Tests/NodeTests.http" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Tests/TestCapabilityDescriber.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Tests/TestMqttClientService.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Tests/TestTransmitter.cs" web="/" />
+            <mapping local="$PROJECT_DIR$/Node.Tests/obj/Debug/net5.0/Node.Tests.AssemblyInfo.cs" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

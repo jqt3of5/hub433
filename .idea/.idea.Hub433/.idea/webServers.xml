@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="f155f2dd-a433-4e20-8ce3-e82151cfbb41" name="tiltpi">
+        <fileTransfer rootFolder="/home/jqt3of5/hub433" accessType="SFTP" host="tiltpi" port="22" sshConfigId="3ee72a6f-8cfd-4251-821f-5539404bd0c4" sshConfig="jqt3of5@tiltpi:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

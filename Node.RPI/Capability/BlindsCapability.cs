@@ -8,7 +8,7 @@ using Node.Hardware.Peripherals;
 
 namespace RPINode.Capability
 {
-    [Capability("Blinds")]
+    [Capability("Blinds", typeof(BlindsStatePayload))]
     public class BlindsCapability : ICapability
     {
         private readonly Transmitter433 _transmitter433;
@@ -27,6 +27,7 @@ namespace RPINode.Capability
         public Task Pair(DeviceCapabilityActionRequest actionRequest)
         {
             var payload = actionRequest.GetPayloadAs<ChannelCommandPayload>();
+            Logger.Log($"Pairing blinds on channel: {payload.Channel}");
             return new Blinds(_transmitter433).Pair(payload.Channel);
         }
 
@@ -39,16 +40,19 @@ namespace RPINode.Capability
         public Task Stop(DeviceCapabilityActionRequest actionRequest)
         {
             var payload = actionRequest.GetPayloadAs<ChannelCommandPayload>();
+            Logger.Log($"Stopping blinds on channel: {payload.Channel}");
             return new Blinds(_transmitter433).Broadcast(payload.Channel, Blinds.BlindsCommand.Stop);
         }
         public Task Up(DeviceCapabilityActionRequest actionRequest)
         {
             var payload = actionRequest.GetPayloadAs<ChannelCommandPayload>();
+            Logger.Log($"Upping blinds on channel: {payload.Channel}");
             return new Blinds(_transmitter433).Broadcast(payload.Channel, Blinds.BlindsCommand.Up);
         }
         public Task Down(DeviceCapabilityActionRequest actionRequest)
         {
             var payload = actionRequest.GetPayloadAs<ChannelCommandPayload>();
+            Logger.Log($"Downing blinds on channel: {payload.Channel}");
             return new Blinds(_transmitter433).Broadcast(payload.Channel, Blinds.BlindsCommand.Down);
         }
 
@@ -76,6 +80,7 @@ namespace RPINode.Capability
                 public float percentage { get; set; }
             }
         }
+        
         public async Task<object> UpdateState(JsonElement request)
         {
             var state = JsonSerializer.Deserialize<BlindsStatePayload>(request.GetRawText());
@@ -89,10 +94,12 @@ namespace RPINode.Capability
                 {
                     if (cs.percentage > .50)
                     {
-                       await blinds.Broadcast(channel, Blinds.BlindsCommand.Close);
+                        Logger.Log($"Closing blinds on channel: {channel}");
+                        await blinds.Broadcast(channel, Blinds.BlindsCommand.Close);
                     }
                     else
                     {
+                        Logger.Log($"Opening blinds on channel: {channel}");
                        await blinds.Broadcast(channel, Blinds.BlindsCommand.Open);
                     }
                 }

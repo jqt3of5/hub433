@@ -4,11 +4,14 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using mqtt.Notification;
 using Node.Abstractions;
+using Unosquare.PiGpio;
 using Unosquare.RaspberryIO;
+using BootstrapPiGpio = Node.Hardware.BootstrapPiGpio;
 
 namespace RPINode
 {
@@ -41,12 +44,17 @@ namespace RPINode
     {
         public static void Main(string[] args)
         {
-            Pi.Init<BootstrapMock>();
+            Pi.Init<BootstrapPiGpio>();
             CreateHostBuilder(args).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((context, config) =>
+                {
+                    //TODO: Should only use this config file when building for raspberry pi
+                    config.AddJsonFile("appsettings.RaspberryPi.json", optional: false);
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>().UseUrls("http://*:8080");

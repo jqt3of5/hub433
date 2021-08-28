@@ -1,0 +1,14 @@
+﻿{
+  "state": {
+    "desired": {
+      "capabilities": {
+        "Blinds": {
+          "channel1": {
+            "percentage": 0.0
+          }
+        } 
+      }
+      
+    }
+  }
+}

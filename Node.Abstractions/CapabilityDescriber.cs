@@ -87,11 +87,15 @@ namespace Node.Abstractions
     public sealed class CapabilityAttribute : Attribute
     {
         public readonly string Name;
+
+        private readonly Type _stateType;
+
         // See the attribute guidelines at 
         //  http://go.microsoft.com/fwlink/?LinkId=85236
-        public CapabilityAttribute(string name)
+        public CapabilityAttribute(string name, Type stateType)
         {
             Name = name;
+            _stateType = stateType;
         }
     } 
     
