@@ -11,11 +11,11 @@
     <projectFile>Sampler433/Sampler433.csproj</projectFile>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec4ed5fc-664c-4e8d-bee4-d8dfab8e9cc5" name="Default Changelist" comment="Adding the sampler, and finishing up the receiver algorithm.">
+    <list default="true" id="ec4ed5fc-664c-4e8d-bee4-d8dfab8e9cc5" name="Default Changelist" comment="Slightly improved">
       <change afterPath="$PROJECT_DIR$/Hub433Backend/src/HelloWorld/Function.cs" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Hub433Backend/src/HelloWorld/HelloWorld.csproj" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Hub433Backend/src/HelloWorld/aws-lambda-tools-defaults.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/indexLayout.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Node.Hardware/Peripherals/Receiver433.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Node.Hardware/Peripherals/Receiver433.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Sampler433/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Sampler433/Program.cs" afterDir="false" />
@@ -46,6 +46,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/E6E6B40B-308C-4FE1-9C93-7C26C144C865/233/ExceptionDispatchInfo.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/CD3C346B-1E2E-4F5D-B1FF-418889A78CDA/1E/Hub`T.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Hub433Backend/src/Hub433Backend/GetShadow.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Users/jqt3o/RiderProjects/hub433/Node.Hardware/Peripherals/Receiver433.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/CD3C346B-1E2E-4F5D-B1FF-418889A78CDA/F/Hub.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/C7788B2B-C733-412D-8EE3-9C302FF7CE57/3/HostBuilder.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Hub433Backend/Hub433Backend.Tests/ShadowTests.cs" root0="SKIP_HIGHLIGHTING" />
@@ -62,6 +63,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/E6E6B40B-308C-4FE1-9C93-7C26C144C865/97/f60df6e6/Func`3.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/E6E6B40B-308C-4FE1-9C93-7C26C144C865/03/92617f04/Func`2.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/754CC282-55E3-437B-9F4E-691658EB26A7/7B/MqttApplicationMessageReceivedEventArgs.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Users/jqt3o/RiderProjects/hub433/Sampler433/Program.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/0C6F207B-A2FB-43B6-ADBE-E16405B26449/82/MqttClient.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/CD3C346B-1E2E-4F5D-B1FF-418889A78CDA/b6/ea9bbe40/IHubClients`1.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/00CD228A-5232-4582-96C9-962DC20FBBAB/2/Pi.cs" root0="SKIP_HIGHLIGHTING" />
@@ -174,7 +176,7 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="reference.settings.deploy.options" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RunManager" selected=".NET Launch Settings Profile.RPINode">
@@ -472,7 +474,14 @@
       <option name="project" value="LOCAL" />
       <updated>1627790975745</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="Slightly improved">
+      <created>1630203545454</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1630203545454</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -513,7 +522,8 @@
     <MESSAGE value="ignore certificate files" />
     <MESSAGE value="Threadsafe transmitter" />
     <MESSAGE value="Instead of instantiating the objects dynamically, create them ahead of time." />
-    <option name="LAST_COMMIT_MESSAGE" value="Instead of instantiating the objects dynamically, create them ahead of time." />
+    <MESSAGE value="Slightly improved" />
+    <option name="LAST_COMMIT_MESSAGE" value="Slightly improved" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

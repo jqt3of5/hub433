@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Node.Hardware;
 using Node.Hardware.Peripherals;
+using Unosquare.PiGpio.NativeMethods;
 using Unosquare.RaspberryIO;
 using Unosquare.RaspberryIO.Abstractions;
 
@@ -27,12 +28,14 @@ namespace Sampler433
                     break;
                 case "receive":
                     var receiver = new Receiver433(Pi.Gpio[BcmPin.Gpio27]);
-                    var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                    var source = new CancellationTokenSource(TimeSpan.FromSeconds(1));
                     var receivedSymbols = await receiver.Receive(source.Token);
                     
                     Console.WriteLine($"total symbol ticks:{receivedSymbols.Sum(s => s.DurationUS)} average symbol length: {receivedSymbols.Average(s => s.DurationUS)}");
                     break;
             }
+            
+            Setup.GpioTerminate();
 
             RadioSymbol[] high() => new[] {new RadioSymbol(750, true), new RadioSymbol(250, false)};
             RadioSymbol[] low() => new[] {new RadioSymbol(250, true), new RadioSymbol(750, false)};
