@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Linq;
+using Node.Hardware;
 using Node.Hardware.Peripherals;
+using Unosquare.RaspberryIO;
+using Unosquare.RaspberryIO.Abstractions;
 
 namespace Sampler433
 {
@@ -8,10 +11,11 @@ namespace Sampler433
     {
         static void Main(string[] args)
         {
+            Pi.Init<BootstrapPiGpio>();
             switch (args[0])
             {
                 case "transmit":
-                    var transmitter = new Transmitter433();
+                    var transmitter = new Transmitter433(Pi.Gpio[BcmPin.Gpio17]);
                     var pattern = args[1];
                     while (true)
                     {
@@ -20,7 +24,9 @@ namespace Sampler433
                     }
                     break;
                 case "receive":
-                    var receiver = new Receiver433();
+                    var receiver = new Receiver433(Pi.Gpio[BcmPin.Gpio27]);
+                    var symboles = receiver.Receive(TimeSpan.FromSeconds(10));
+                    Console.WriteLine($"total symbol ticks:{symboles.Sum(s => s.DurationUS)} average symbol length: {symboles.Average(s => s.DurationUS)}");
                     break;
             }
 

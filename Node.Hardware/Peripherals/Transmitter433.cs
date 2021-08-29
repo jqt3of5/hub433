@@ -6,7 +6,7 @@ using Unosquare.RaspberryIO.Abstractions;
 
 namespace Node.Hardware.Peripherals
 {
-    public record RadioSymbol(int DurationUS, bool Value, int? Samples = null);
+    public record RadioSymbol(long DurationUS, bool Value, long? Samples = null);
     
     public static class RadioSymbolExtensions {
     

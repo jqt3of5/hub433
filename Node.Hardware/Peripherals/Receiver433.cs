@@ -14,47 +14,63 @@ namespace Node.Hardware.Peripherals
         {
             _pin = pin;
             _pin.PinMode = GpioPinDriveMode.Input;
+            _pin.InputPullMode = GpioPinResistorPullMode.PullDown;
         }
 
         public RadioSymbol[] Receive(TimeSpan timeout)
         {
-            List<bool> samples = new List<bool>(10000);
+            List<RadioSymbol> symbols = new List<RadioSymbol>(1000);
             var sw = new Stopwatch();
+            sw.Start();
+            
             var ticks = 0L;
+            
+            const int window = 10; //# samples
+            const int sample_time = 20000; //nS
+            var history = new Queue<bool>();
+            bool? lastValue = null;
+            long? lastTicks = null;
+            long totalMissed = 0;
             while (sw.Elapsed < timeout)
             {
                 for (int i = 0; i < 100; ++i)
                 {
-                    samples.Add(_pin.Value); 
+                    ticks = sw.ElapsedTicks + sample_time;
+                    history.Enqueue(_pin.Value);
+                    
+                    //Don't run the algorithm if our queue isn't full 
+                    if (history.Count >= window)
+                    {
+                        var t = sw.ElapsedTicks;
+                        var v = lowPass(history.ToArray());
+                        //If our value switches, track the edge. 
+                        if (v != lastValue)
+                        {
+                            if (lastTicks != null)
+                            {
+                                symbols.Add(new RadioSymbol((int) (t - lastTicks), v)); 
+                            }
+                            
+                            lastValue = v;
+                            lastTicks = t;
+                        } 
+                        history.Dequeue();
+                    }
+                    
+                    if (sw.ElapsedTicks > ticks + sample_time)
+                    {
+                        //Not really sure about this, but if elapsed ticks is greater than our target, then we did too much processing
+                        totalMissed += 1;
+                    }
+                    
                     // ReSharper disable once EmptyEmbeddedStatement
-                    ticks = sw.ElapsedTicks + 9;
                     while (sw.ElapsedTicks < ticks);
                 }
             }
-
-            const int window = 5;
-            var history = new Queue<bool>();
-            bool? value = null;
-            for(var i = 0; i < samples.Count; ++i)
-            {
-                 history.Enqueue(samples[i]);
-                 if (history.Count < window)
-                     //Don't run the algorithm if our queue isn't full 
-                     continue;
-
-                 var v = lowPass(history.ToArray());
-                 if (v != value)
-                 {
-                     value = v;
-                 }
-                 
-                 history.Dequeue();
-            }
-
+            Console.WriteLine($"totalMissed: {totalMissed} totalSymbols:{symbols.Count} ticksPerSecond: {Stopwatch.Frequency}");
             bool lowPass(IEnumerable<bool> samples) => samples.Sum( b => b ? 1.0 : 0.0 ) / samples.Count() > .5;
-            
-            //TODO: Process the results and convert into radio symbols
-            return new RadioSymbol[] { };
+
+            return symbols.ToArray();
         }
         
     }
