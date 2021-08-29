@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Node.Hardware;
 using Node.Hardware.Peripherals;
 using Unosquare.RaspberryIO;
@@ -9,7 +11,7 @@ namespace Sampler433
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Pi.Init<BootstrapPiGpio>();
             switch (args[0])
@@ -20,13 +22,15 @@ namespace Sampler433
                     while (true)
                     {
                         var symbols = pattern.SelectMany(bit => bit == '1' ? high() : low());
-                        transmitter.Transmit(symbols.ToArray());
+                        await transmitter.Transmit(symbols.ToArray());
                     }
                     break;
                 case "receive":
                     var receiver = new Receiver433(Pi.Gpio[BcmPin.Gpio27]);
-                    var symboles = receiver.Receive(TimeSpan.FromSeconds(10));
-                    Console.WriteLine($"total symbol ticks:{symboles.Sum(s => s.DurationUS)} average symbol length: {symboles.Average(s => s.DurationUS)}");
+                    var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                    var receivedSymbols = await receiver.Receive(source.Token);
+                    
+                    Console.WriteLine($"total symbol ticks:{receivedSymbols.Sum(s => s.DurationUS)} average symbol length: {receivedSymbols.Average(s => s.DurationUS)}");
                     break;
             }
 
