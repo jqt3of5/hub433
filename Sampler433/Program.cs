@@ -28,10 +28,16 @@ namespace Sampler433
                     break;
                 case "receive":
                     var receiver = new Receiver433(Pi.Gpio[BcmPin.Gpio27]);
-                    var source = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+                    var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                     var receivedSymbols = await receiver.Receive(source.Token);
+
+                    Console.WriteLine($"total symbol ticks:{receivedSymbols.Sum(s => s.DurationUS)}");
+
+                    foreach (var radioSymbol in receivedSymbols)
+                    {
+                        Console.Write($"{(radioSymbol.Value? "1" : "0")}({radioSymbol.DurationUS}) ");
+                    }
                     
-                    Console.WriteLine($"total symbol ticks:{receivedSymbols.Sum(s => s.DurationUS)} average symbol length: {receivedSymbols.Average(s => s.DurationUS)}");
                     break;
             }
             
