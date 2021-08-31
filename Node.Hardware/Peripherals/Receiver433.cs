@@ -37,7 +37,6 @@ namespace Node.Hardware.Peripherals
                     do
                     {
                         value = _pin.Value;
-                        totalSamples += 1;
                         bitSamples += 1;
                         if (value)
                         {
@@ -51,14 +50,15 @@ namespace Node.Hardware.Peripherals
                             break;
                         }
 
-                        //If the numberof samples for this bit exceeds the average samples per bit, timeout. Poor mans PLL
+                        //If the number of samples for this bit exceeds the average samples per bit, timeout. Poor mans PLL
                         //TODO: This might be a little sketchy, depends on a few starting bits that are longer than normal. 
-                    } while (bitSamples < totalSamples/symbols.Count);
+                    } while (symbols.Count == 0 || bitSamples < totalSamples/symbols.Count);
                     
                     sw.Stop();
                     symbols.Add(new RadioSymbol(sw.ElapsedTicks, ((float)highSamples/bitSamples) > .5, bitSamples-1));        
                     sw.Restart();
-                    
+
+                    totalSamples += bitSamples;
                     bitSamples = 1;
                     if (value == true)
                     {
