@@ -25,31 +25,46 @@ namespace Node.Hardware.Peripherals
             {
                 List<RadioSymbol> symbols = new List<RadioSymbol>();
 
-                long waveSample = 0;
+                long highSamples = 0;
+                long bitSamples = 0;
                 long totalSamples = 0;
                 bool? lastValue = null;
                 var sw = new Stopwatch();
 
-                while (true)
+                while (!token.IsCancellationRequested)
                 {
-                    var value = _pin.Value;
-                    totalSamples += 1;
-                    waveSample += 1; 
-                    if (value != lastValue && lastValue.HasValue)
+                    bool value;
+                    do
                     {
-                        sw.Stop();
-                        symbols.Add(new RadioSymbol(sw.ElapsedTicks, lastValue.Value, waveSample -1));        
-                        waveSample = 1;
-                        sw.Restart();
+                        value = _pin.Value;
+                        totalSamples += 1;
+                        bitSamples += 1;
+                        if (value)
+                        {
+                            highSamples += 1;
+                        }
+
+                        //If we read a high state after a low state, bit transition
+                        //TODO: this is pretty sensitive to any noise - if we get an errant high reading then the bit ends!. probably not likely though...
+                        if (value == true && lastValue == false)
+                        {
+                            break;
+                        }
+
+                        //If the numberof samples for this bit exceeds the average samples per bit, timeout. Poor mans PLL
+                        //TODO: This might be a little sketchy, depends on a few starting bits that are longer than normal. 
+                    } while (bitSamples < totalSamples/symbols.Count);
+                    
+                    sw.Stop();
+                    symbols.Add(new RadioSymbol(sw.ElapsedTicks, ((float)highSamples/bitSamples) > .5, bitSamples-1));        
+                    sw.Restart();
+                    
+                    bitSamples = 1;
+                    if (value == true)
+                    {
+                        highSamples = 1;
                     }
                     lastValue = value;
-                    
-                    if (token.IsCancellationRequested)
-                }
-
-                if (lastValue.HasValue)
-                {
-                    symbols.Add(new RadioSymbol(waveSample, lastValue.Value));        
                 }
             
                 Console.WriteLine($"total samples: {totalSamples}");
