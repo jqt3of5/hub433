@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Node.Abstractions;
 using Node.Hardware;
 using Node.Hardware.Peripherals;
 using Unosquare.PiGpio.NativeMethods;
@@ -15,6 +16,7 @@ namespace Sampler433
         static async Task Main(string[] args)
         {
             Pi.Init<BootstrapPiGpio>();
+            // Pi.Init<BootstrapMock>();
             switch (args[0])
             {
                 case "transmit":
@@ -38,6 +40,11 @@ namespace Sampler433
                         Console.Write($"{(radioSymbol.Value? "1" : "0")}({radioSymbol.DurationUS}) ");
                     }
                     
+                    break;
+                case "dht":
+                    var dht = new DhtCore(Pi.Gpio[BcmPin.Gpio22]);
+                    var v = await dht.GetNextValue();
+                    Console.WriteLine($"temp: {v.temperature} humidity: {v.humidity}");
                     break;
             }
             

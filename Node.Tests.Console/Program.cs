@@ -17,8 +17,8 @@ namespace Node.Tests.Console
     {
         static async Task Main(string[] args)
         {
-            // Pi.Init<BootstrapPiGpio>();
-            Pi.Init<BootstrapMock>(); 
+            Pi.Init<BootstrapPiGpio>();
+            // Pi.Init<BootstrapMock>(); 
             var pin = Pi.Gpio[BcmPin.Gpio17];
             var transmitter = new Transmitter433(pin);
             var relay = new RemoteRelay(transmitter);

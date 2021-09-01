@@ -11,8 +11,9 @@ namespace Node.Hardware.Peripherals
 
         public DhtCore(IGpioPin pin)
         {
-            InternalDevice = DhtSensor.Create(DhtType.Dht11, pin);
+            InternalDevice = DhtSensor.Create(DhtType.AM2302, pin);
             InternalDevice.OnDataAvailable += DeviceOnOnDataAvailable;
+            InternalDevice.Start();
         }
 
         private TaskCompletionSource<(double humidity, double temperature)>? _readSource;
@@ -20,7 +21,6 @@ namespace Node.Hardware.Peripherals
         {
             if (e.IsValid)
             {
-
                 _lastValue = (e.HumidityPercentage, e.Temperature);
                 _readSource?.SetResult(_lastValue.Value);
             }

@@ -41,6 +41,16 @@ namespace Node.Hardware
                {
                    _pin = pin;
                }
+
+               public override bool Equals(object? obj)
+               {
+                   if (obj is IGpioPin pin)
+                   {
+                       return BcmPin == pin.BcmPin;
+                   }
+                   return false;
+               }
+
                public bool Read()
                {
                    return _pin.Read() > 0;
@@ -93,8 +103,22 @@ namespace Node.Hardware
 
                public BcmPin BcmPin => (BcmPin) _pin.PinNumber;
                public int BcmPinNumber => _pin.PinNumber;
-               public int PhysicalPinNumber => 0;
-               public GpioHeader Header => GpioHeader.None;
+
+               private int[] BcmNumberToPhysicalPinMapping = new[]
+               {
+                   27, 28, 3, 5, 7, 29, 31, 26, 24, 21, 19, 23, 32, 33, 8, 10, 36, 11, 12, 35, 38, 40, 15, 16, 18, 22,
+                   37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+               };
+               public int PhysicalPinNumber
+               {
+                   get
+                   {
+                       var pin = BcmNumberToPhysicalPinMapping[BcmPinNumber];
+                       return pin;
+                   }
+               }
+
+               public GpioHeader Header => GpioHeader.P1;
 
                public GpioPinDriveMode PinMode
                {
@@ -201,13 +225,25 @@ namespace Node.Hardware
 
            public int Count => Board.Pins.Count;
 
-           public IGpioPin this[int bcmPinNumber] => new PiGpioPin(Board.Pins[bcmPinNumber]);
+           private Dictionary<int, IGpioPin> _pins = new Dictionary<int, IGpioPin>();
 
-           public IGpioPin this[BcmPin bcmPin] => new PiGpioPin(Board.Pins[(int)bcmPin]);
+           public IGpioPin this[int bcmPinNumber]
+           {
+               get
+               {
+                   if (!_pins.ContainsKey(bcmPinNumber))
+                   {
+                     _pins[bcmPinNumber] = new PiGpioPin(Board.Pins[bcmPinNumber]);  
+                   }
+                   return _pins[bcmPinNumber];
+               }
+           } 
 
-           public IGpioPin this[P1 pinNumber] => new PiGpioPin(Board.Pins[(int)pinNumber]);
+           public IGpioPin this[BcmPin bcmPin] => this[(int) bcmPin];
 
-           public IGpioPin this[P5 pinNumber] => new PiGpioPin(Board.Pins[(int)pinNumber]);
+           public IGpioPin this[P1 pinNumber] => this[(int) pinNumber];
+
+           public IGpioPin this[P5 pinNumber] => this[(int) pinNumber];
        }
     }
 }
