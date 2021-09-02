@@ -27,44 +27,71 @@ namespace Node.Hardware.Peripherals
 
                 long highSamples = 0;
                 long bitSamples = 0;
+                
                 long totalSamples = 0;
                 bool? lastValue = null;
-                var sw = new Stopwatch();
 
+                Queue<int> lowPassQueue = new Queue<int>();
+                int sampleIntegration = 0;
+                const int sample_window = 100;
+                
+                var sw = new Stopwatch();
                 while (!token.IsCancellationRequested)
                 {
-                    bool value;
+                    bool readValue;
                     do
                     {
-                        value = _pin.Value;
+                        readValue = _pin.Value;
+                        
+                        //Low pass the read value
+                        var v = readValue ? 1 : 0;
+                        sampleIntegration += v;
+                        lowPassQueue.Enqueue(v);
+                        //Full queue
+                        if (lowPassQueue.Count > sample_window)
+                        {
+                            sampleIntegration -= lowPassQueue.Dequeue();
+                        }
+                        //less than half empty. half full is fine
+                        else if (lowPassQueue.Count < sample_window/2 + 1)
+                        {
+                            //fill the queue
+                            continue;
+                        }
+
+                        readValue = ((float)sampleIntegration / lowPassQueue.Count > .5);
+                        
                         bitSamples += 1;
-                        if (value)
+                        if (readValue)
                         {
                             highSamples += 1;
+                            if (lastValue == false)
+                            {
+                                lastValue = readValue;
+                                break;
+                            }
                         }
-
-                        //If we read a high state after a low state, bit transition
-                        //TODO: this is pretty sensitive to any noise - if we get an errant high reading then the bit ends!. probably not likely though...
-                        if (value == true && lastValue == false)
-                        {
-                            break;
-                        }
-
+                        
+                        lastValue = readValue;
+                        //Bit change, lowpassed values
                         //If the number of samples for this bit exceeds the average samples per bit, timeout. Poor mans PLL
-                        //TODO: This might be a little sketchy, depends on a few starting bits that are longer than normal. 
                     } while (symbols.Count == 0 || bitSamples < totalSamples/symbols.Count);
                     
+                    
                     sw.Stop();
-                    symbols.Add(new RadioSymbol(sw.ElapsedTicks, ((float)highSamples/bitSamples) > .5, bitSamples-1));        
+                    symbols.Add(new RadioSymbol(sw.ElapsedTicks, ((float)(highSamples-(readValue?1:0))/(bitSamples-1)) > .5, highSamples-(readValue?1:0), bitSamples-1));        
                     sw.Restart();
 
-                    totalSamples += bitSamples;
+                    totalSamples += bitSamples-1;
                     bitSamples = 1;
-                    if (value == true)
+                    if (readValue)
                     {
                         highSamples = 1;
                     }
-                    lastValue = value;
+                    else
+                    {
+                        highSamples = 0;
+                    }
                 }
             
                 Console.WriteLine($"total samples: {totalSamples}");

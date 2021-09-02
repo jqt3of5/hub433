@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Node.Abstractions;
 using Node.Hardware;
 using Node.Hardware.Peripherals;
+using Swan.Diagnostics;
 using Unosquare.PiGpio.NativeMethods;
 using Unosquare.RaspberryIO;
 using Unosquare.RaspberryIO.Abstractions;
@@ -37,12 +38,13 @@ namespace Sampler433
 
                     foreach (var radioSymbol in receivedSymbols)
                     {
-                        Console.Write($"{(radioSymbol.Value? "1" : "0")}({radioSymbol.DurationUS}) ");
+                        Console.Write($"{(radioSymbol.Value? "1" : "0")}({radioSymbol.highSamples}, {radioSymbol.Samples}) ");
                     }
                     
                     break;
                 case "dht":
-                    var dht = new DhtCore(Pi.Gpio[BcmPin.Gpio22]);
+                    var p = Pi.Gpio[BcmPin.Gpio22];
+                    var dht = new DhtCore(p);
                     var v = await dht.GetNextValue();
                     Console.WriteLine($"temp: {v.temperature} humidity: {v.humidity}");
                     break;
