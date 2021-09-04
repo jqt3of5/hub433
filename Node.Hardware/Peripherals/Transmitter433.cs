@@ -79,7 +79,6 @@ namespace Node.Hardware.Peripherals
         public Transmitter433(IGpioPin pin)
         {
             _pin = pin;
-            pin.InputPullMode = GpioPinResistorPullMode.PullUp;
             pin.PinMode = GpioPinDriveMode.Output;
             pin.Value = false;
         }

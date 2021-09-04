@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using Swan.DependencyInjection;
+using Swan.Diagnostics;
 using Unosquare.PiGpio;
 using Unosquare.PiGpio.ManagedModel;
 using Unosquare.PiGpio.NativeEnums;
@@ -27,10 +30,27 @@ namespace Node.Hardware
             // DependencyContainer.Current.Register<ISpiBus>((ISpiBus) new SpiBus());
             // DependencyContainer.Current.Register<II2CBus>((II2CBus) new I2CBus());
             // DependencyContainer.Current.Register<ISystemInfo>((ISystemInfo) new SystemInfo());
-            // DependencyContainer.Current.Register<ITiming>((ITiming) new TimingMock());
+            DependencyContainer.Current.Register<ITiming>((ITiming) new PiTiming());
             // DependencyContainer.Current.Register<IThreading>((IThreading) new Threading());  
         }
-        
+
+        public class PiTiming : ITiming
+        {
+            public void SleepMilliseconds(uint millis)
+            {
+               Thread.Sleep((int)millis); 
+            }
+
+            public void SleepMicroseconds(uint micros)
+            {
+                var sw = new HighResolutionTimer();
+                sw.Start();
+                while (sw.ElapsedMicroseconds < micros) ;
+            }
+
+            public uint Milliseconds { get; }
+            public uint Microseconds { get; }
+        }
        public class PiGpioController : IGpioController
        {
            public class PiGpioPin : IGpioPin
@@ -78,7 +98,28 @@ namespace Node.Hardware
 
                public bool WaitForValue(GpioPinValue status, int timeOutMillisecond)
                {
-                   throw new NotImplementedException();
+                   var sw = new Stopwatch();
+                   sw.Start();
+                   while (sw.ElapsedMilliseconds < timeOutMillisecond)
+                   {
+                       switch (status)
+                       {
+                           case GpioPinValue.High:
+                               if (Read())
+                               {
+                                   return true;
+                               }
+                               break;
+                           case GpioPinValue.Low:
+                               if (!Read())
+                               {
+                                   return false;
+                               }
+                               break;
+                       }
+                   }
+
+                   return false;
                }
 
                public void RegisterInterruptCallback(EdgeDetection edgeDetection, Action callback)

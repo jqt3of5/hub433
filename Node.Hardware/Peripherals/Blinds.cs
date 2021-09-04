@@ -9,8 +9,8 @@ namespace Node.Hardware.Peripherals
     public class Blinds
     { 
         private readonly Transmitter433 _transmitter433;
-       private readonly RadioSymbol[] _startPattern = new[] {new RadioSymbol(4000, true), new RadioSymbol(2500, false), new RadioSymbol(1000, true)};
-       private readonly RadioSymbol[] _repeatPattern = new[] {new RadioSymbol(5000, true), new RadioSymbol(2500, false), new RadioSymbol(1000, true)};
+       private readonly RadioSymbol[] _startPattern = new[] {new RadioSymbol(4000, true), new RadioSymbol(2400, false), new RadioSymbol(950, true)};
+       private readonly RadioSymbol[] _repeatPattern = new[] {new RadioSymbol(5000, true), new RadioSymbol(2400, false), new RadioSymbol(950, true)};
        public int BcmPin => _transmitter433.BcmPin;
        
        public Blinds(Transmitter433 transmitter433)
@@ -79,14 +79,14 @@ namespace Node.Hardware.Peripherals
            //TODO: Update to use new ToSymbols() method and use bits instead of strings
            var data = bits.SelectMany(bit => 
                bit == '1' ? 
-                   new [] {new RadioSymbol(725, true), new RadioSymbol(350, false)} : 
-                   new [] {new RadioSymbol(350, true), new RadioSymbol(725, false)}
+                   new [] {new RadioSymbol(688, true), new RadioSymbol(305, false)} : 
+                   new [] {new RadioSymbol(305, true), new RadioSymbol(688, false)}
            ).ToList();
 
            var buffer = _startPattern.Concat(data);
            var buffer2 = _repeatPattern.Concat(data).ToArray();
 
-           for (int i = 0; i < 10; ++i)
+           for (int i = 0; i < 6; ++i)
            {
                buffer = buffer.Concat(buffer2);
            }

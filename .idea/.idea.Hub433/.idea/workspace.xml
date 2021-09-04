@@ -11,12 +11,11 @@
     <projectFile>Sampler433/Sampler433.csproj</projectFile>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec4ed5fc-664c-4e8d-bee4-d8dfab8e9cc5" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/indexLayout.xml" afterDir="false" />
+    <list default="true" id="ec4ed5fc-664c-4e8d-bee4-d8dfab8e9cc5" name="Default Changelist" comment="it attempts toread now, but doesn't actually ever read...">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Hub433/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Node.Hardware/BootstrapPiGpio.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Node.Hardware/BootstrapPiGpio.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Node.Hardware/Peripherals/DhtCore.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Node.Hardware/Peripherals/DhtCore.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Node.Tests.Console/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Node.Tests.Console/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Node.Hardware/Peripherals/Blinds.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Node.Hardware/Peripherals/Blinds.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Node.Hardware/Peripherals/Transmitter433.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Node.Hardware/Peripherals/Transmitter433.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Sampler433/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Sampler433/Program.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -128,7 +127,6 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Hub433/Controllers/MqttController.cs" />
       <option value="$PROJECT_DIR$/Hub433/Controllers/MqttHostedService.cs" />
       <option value="$PROJECT_DIR$/Node.Abstractions/ClaimDevice.cs" />
       <option value="$PROJECT_DIR$/Hub433/Controllers/NodeHub.cs" />
@@ -172,13 +170,14 @@
       <option value="$PROJECT_DIR$/Node.RPI/appsettings.json" />
       <option value="$PROJECT_DIR$/Node.RPI/CapabilityService.cs" />
       <option value="$PROJECT_DIR$/Node.RPI/CommunicationService.cs" />
-      <option value="$PROJECT_DIR$/Node.Hardware/Peripherals/Transmitter433.cs" />
       <option value="$PROJECT_DIR$/Node.Hardware/Peripherals/Receiver433.cs" />
       <option value="$PROJECT_DIR$/Node.Abstractions/MockController.cs" />
       <option value="$PROJECT_DIR$/Node.Tests.Console/Program.cs" />
-      <option value="$PROJECT_DIR$/Sampler433/Program.cs" />
-      <option value="$PROJECT_DIR$/Node.Hardware/BootstrapPiGpio.cs" />
       <option value="$PROJECT_DIR$/Node.Hardware/Peripherals/DhtCore.cs" />
+      <option value="$PROJECT_DIR$/Node.Hardware/BootstrapPiGpio.cs" />
+      <option value="$PROJECT_DIR$/Node.Hardware/Peripherals/Transmitter433.cs" />
+      <option value="$PROJECT_DIR$/Sampler433/Program.cs" />
+      <option value="$PROJECT_DIR$/Node.Hardware/Peripherals/Blinds.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1sIzUHKh5Fcrb6RGtVu4Fq36SBw" />
@@ -353,6 +352,7 @@
       <workItem from="1627694406953" duration="16342000" />
       <workItem from="1628389629350" duration="9642000" />
       <workItem from="1630118203609" duration="6264000" />
+      <workItem from="1630519611656" duration="11207000" />
     </task>
     <task id="LOCAL-00001" summary="First commit">
       <created>1620614873309</created>
@@ -508,7 +508,14 @@
       <option name="project" value="LOCAL" />
       <updated>1630203545454</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="it attempts toread now, but doesn't actually ever read...">
+      <created>1630463926608</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1630463926609</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -550,7 +557,8 @@
     <MESSAGE value="Threadsafe transmitter" />
     <MESSAGE value="Instead of instantiating the objects dynamically, create them ahead of time." />
     <MESSAGE value="Slightly improved" />
-    <option name="LAST_COMMIT_MESSAGE" value="Slightly improved" />
+    <MESSAGE value="it attempts toread now, but doesn't actually ever read..." />
+    <option name="LAST_COMMIT_MESSAGE" value="it attempts toread now, but doesn't actually ever read..." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -673,13 +681,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/Sampler433/Program.cs</url>
-          <line>18</line>
+          <line>20</line>
           <properties documentPath="C:\Users\jqt3o\sd\Hub433\Sampler433\Program.cs" initialLine="18" containingFunctionPresentation="method 'Main'">
             <startOffsets>
-              <option value="434" />
+              <option value="499" />
             </startOffsets>
             <endOffsets>
-              <option value="459" />
+              <option value="524" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="56" />

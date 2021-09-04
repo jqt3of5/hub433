@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using Node.Abstractions;
 using Node.Hardware;
 using Node.Hardware.Peripherals;
+using Swan.Diagnostics;
 using Unosquare.PiGpio.NativeMethods;
 using Unosquare.RaspberryIO;
 using Unosquare.RaspberryIO.Abstractions;
+using Unosquare.RaspberryIO.Peripherals;
 
 namespace Sampler433
 {
@@ -19,6 +21,11 @@ namespace Sampler433
             // Pi.Init<BootstrapMock>();
             switch (args[0])
             {
+                case "blinds":
+                    var trans= new Transmitter433(Pi.Gpio[BcmPin.Gpio17]);
+                    var blinds = new Blinds(trans);
+                    await blinds.Broadcast(Blinds.BlindsChannel.Channel2, Blinds.BlindsCommand.Up);
+                    break;
                 case "transmit":
                     var transmitter = new Transmitter433(Pi.Gpio[BcmPin.Gpio17]);
                     var pattern = args[1];
@@ -40,11 +47,6 @@ namespace Sampler433
                         Console.Write($"{(radioSymbol.Value? "1" : "0")}({radioSymbol.DurationUS}) ");
                     }
                     
-                    break;
-                case "dht":
-                    var dht = new DhtCore(Pi.Gpio[BcmPin.Gpio22]);
-                    var v = await dht.GetNextValue();
-                    Console.WriteLine($"temp: {v.temperature} humidity: {v.humidity}");
                     break;
             }
             
