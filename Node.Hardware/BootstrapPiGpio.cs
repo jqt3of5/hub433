@@ -38,14 +38,18 @@ namespace Node.Hardware
         {
             public void SleepMilliseconds(uint millis)
             {
-               Thread.Sleep((int)millis); 
+                var timer = new HighResolutionTimer();
+                timer.Start();
+
+                while (timer.ElapsedMilliseconds < millis) ;
             }
 
             public void SleepMicroseconds(uint micros)
             {
-                var sw = new HighResolutionTimer();
-                sw.Start();
-                while (sw.ElapsedMicroseconds < micros) ;
+                var timer = new HighResolutionTimer();
+                timer.Start();
+
+                while (timer.ElapsedMicroseconds < micros) ;
             }
 
             public uint Milliseconds { get; }
@@ -102,19 +106,22 @@ namespace Node.Hardware
                    sw.Start();
                    while (sw.ElapsedMilliseconds < timeOutMillisecond)
                    {
+                       var read = Read();
                        switch (status)
                        {
                            case GpioPinValue.High:
-                               if (Read())
+                               if (read)
                                {
                                    return true;
                                }
+                               
                                break;
                            case GpioPinValue.Low:
-                               if (!Read())
+                               if (!read)
                                {
-                                   return false;
+                                   return true;
                                }
+
                                break;
                        }
                    }

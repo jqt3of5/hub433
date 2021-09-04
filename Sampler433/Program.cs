@@ -44,9 +44,14 @@ namespace Sampler433
 
                     foreach (var radioSymbol in receivedSymbols)
                     {
-                        Console.Write($"{(radioSymbol.Value? "1" : "0")}({radioSymbol.DurationUS}) ");
+                        Console.Write($"{(radioSymbol.Value? "1" : "0")}({radioSymbol.highSamples}, {radioSymbol.Samples}) ");
                     }
                     
+                    break;
+                case "dht":
+                    var dht = new DhtCore(Pi.Gpio[BcmPin.Gpio22]);
+                    var v = await dht.GetNextValue();
+                    Console.WriteLine($"temp: {v.temperature} humidity: {v.humidity}");
                     break;
             }
             

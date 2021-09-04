@@ -9,10 +9,4 @@
       <ProjectReference Include="..\Node.Hardware\Node.Hardware.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <None Update="libpigpio.so">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
-
 </Project>
